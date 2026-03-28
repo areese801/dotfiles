@@ -260,7 +260,7 @@ alias ccd='claude --continue --enable-auto-mode || claude --enable-auto-mode'
 alias ccvd='claude --continue --dangerously-skip-permissions || claude --enable-auto-mode --dangerously-skip-permissions'
 alias cl='claude login'
 alias cloc='cloc --exclude-dir=venv,.venv,virtualenv,node_modules,vendor,bower_components,.bundle,Pods,target,build,dist,__pycache__,.egg-info'
-clean() {
+function clean() {
     local _remote=false
     local _dry_run=false
 
