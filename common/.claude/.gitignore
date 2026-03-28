@@ -1,0 +1,9 @@
+# Ignore everything in ~/.claude by default
+*
+
+# Except these configuration files
+!.gitignore
+!CLAUDE.md
+!settings.json
+!skills
+!statusline.sh

@@ -1,0 +1,38 @@
+# Custom keymaps for yazi
+[[mgr.prepend_keymap]]
+on = [ "v" ]
+run = "open --for=edit"
+desc = "Open file for editing with nvim (matches shell alias 'v')"
+
+# Quick navigation shortcuts
+[[mgr.prepend_keymap]]
+on = [ "g", "h" ]
+run = "cd ~"
+desc = "Go to home directory"
+
+[[mgr.prepend_keymap]]
+on = [ "g", "d" ]
+run = "cd ~/Downloads"
+desc = "Go to Downloads"
+
+[[mgr.prepend_keymap]]
+on = [ "g", "c" ]
+run = "cd ~/.config"
+desc = "Go to config directory"
+
+[[mgr.prepend_keymap]]
+on = [ "g", "n" ]
+run = "cd ~/.config/nvim"
+desc = "Go to nvim config"
+
+# Git integration
+[[mgr.prepend_keymap]]
+on = [ "g", "s" ]
+run = '''shell "git status && read" --block --confirm'''
+desc = "Show git status"
+
+# File operations
+[[mgr.prepend_keymap]]
+on = [ "c", "p" ]
+run = '''shell 'echo "$1" | pbcopy' --confirm'''
+desc = "Copy file path to clipboard"

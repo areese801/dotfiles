@@ -1,0 +1,24 @@
+-- =============================================================================
+-- DATABASE CONFIGURATION FOR VIM-DADBOD
+-- =============================================================================
+--
+-- Add database connections here. Example:
+--
+-- local function read_credential_file(path)
+--   local file = io.open(path, "r")
+--   if not file then return nil end
+--   local content = file:read("*all")
+--   file:close()
+--   return content:gsub("%s+$", ""):gsub("^%s+", "")
+-- end
+--
+-- local password = read_credential_file("/.credentials/my_db_password")
+-- if password then
+--   vim.g.dbs = {
+--     my_connection = string.format("postgresql://user:%s@host:5432/dbname", password)
+--   }
+-- end
+--
+-- =============================================================================
+
+vim.g.dbs = {}

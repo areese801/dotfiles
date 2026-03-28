@@ -1,0 +1,55 @@
+# machine.zsh.example - Template for machine-specific configuration
+#
+# This file is NOT tracked in git. Copy it to ~/.config/zsh/machine.zsh
+# and customize for your specific machine.
+#
+# Usage:
+#   cp ~/.config/zsh/machine.zsh.example ~/.config/zsh/machine.zsh
+#   # Edit machine.zsh with your local customizations
+#
+# The machine.zsh file is sourced LAST, so it can override anything
+# defined in core.zsh, macos.zsh, or linux.zsh.
+
+###
+## Machine Identification (optional)
+###
+# export _MACHINE_TYPE="personal"  # or "work"
+
+###
+## Personal Mac Example
+###
+# # Personal-specific paths
+# PATH="$PATH:$HOME/personal-tools/bin"
+#
+# # Personal project shortcuts
+# alias blog="cd ~/projects/personal/blog"
+
+###
+## Work Mac Example
+###
+# export _MACHINE_TYPE="work"
+#
+# # Work AWS profile
+# export AWS_PROFILE="work-profile"
+#
+# # Work project shortcuts
+# alias proj="cd ~/work/projects"
+# alias tickets="open https://company.atlassian.net/browse"
+#
+# # Work-specific tools
+# PATH="$PATH:/opt/work-tools/bin"
+#
+# # Work VPN helper
+# alias vpn="open -a 'Cisco AnyConnect'"
+
+###
+## Omarchy/Linux Example
+###
+# export _MACHINE_TYPE="linux-desktop"
+#
+# # Additional Linux-specific paths
+# PATH="$PATH:$HOME/.local/share/flatpak/exports/bin"
+#
+# # Hyprland-specific aliases
+# alias monitors="hyprctl monitors"
+# alias reload-hypr="hyprctl reload"
