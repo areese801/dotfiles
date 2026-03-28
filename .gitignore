@@ -12,6 +12,7 @@
 
 # Private/sensitive configuration (never commit)
 common/.config/zsh/private.zsh
+private.zsh
 
 # Environment files
 .env
