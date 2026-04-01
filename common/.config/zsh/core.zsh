@@ -246,7 +246,7 @@ entity_data() {
 ###
 
 alias ff='fzf'
-# alias penv='bash ~/scripts/make_python_env_fast.sh'
+alias penv='python3 -m venv venv'
 alias a='deactivate 2>/dev/null; . $(find . -type f -name "activate" -exec realpath {} + | awk -v pwd="$(realpath .)" '\''{print length($0), $0}'\'' | sort -n | cut -d " " -f 2- | head -n 1) && which python'
 # alias about='bash ~/scripts/dbt_about.sh'
 # alias c='bash ~/scripts/dbt_compile_and_link.sh'
@@ -347,25 +347,27 @@ function clean() {
         # Fetch and prune stale remote tracking refs first
         git fetch --prune
 
-        local _remote_branches
-        _remote_branches=$(git branch -r --merged "$_default_branch" \
+        local -a _remote_branches
+        _remote_branches=("${(@f)$(git branch -r --merged "$_default_branch" \
             | grep -Ev "(origin/${_default_branch}|origin/HEAD)" \
-            | sed 's|origin/||' \
-            | xargs)
+            | sed 's|^ *origin/||')}")
 
-        if [ -z "$_remote_branches" ]; then
+        # Filter out empty entries
+        _remote_branches=(${_remote_branches:#})
+
+        if [ ${#_remote_branches[@]} -eq 0 ]; then
             echo "No remote merged branches to clean up."
             return 0
         fi
 
         if $_dry_run; then
             echo "Would delete remote branches:"
-            for _b in ${(z)_remote_branches}; do
+            for _b in "${_remote_branches[@]}"; do
                 echo "  origin/$_b"
             done
         else
             echo "Deleting remote merged branches..."
-            for _b in ${(z)_remote_branches}; do
+            for _b in "${_remote_branches[@]}"; do
                 echo "  Deleting origin/$_b"
                 git push origin --delete "$_b"
             done
