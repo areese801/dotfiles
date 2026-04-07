@@ -118,8 +118,8 @@ Variants for launching tmux-based development sessions:
 Each column has 3 rows: claude (top ~30%), nvim (middle ~60%), shell (bottom ~10%).
 
 **Operations:**
-- `dev3 --swap <slot> <new_path>` — replace a column's project (respawn-pane)
-- `dev3 --switch <slot_a> <slot_b>` — swap two columns' positions (swap-pane)
+- `dev3 --replace <slot> <new_path>` — replace a column's project (respawn-pane)
+- `dev3 --swap <slot_a> <slot_b>` — swap two columns' positions (swap-pane)
 - `dev3` (no args) — reattach to existing session
 
 ### Keeping Variants in Sync

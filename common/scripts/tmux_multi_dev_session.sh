@@ -4,20 +4,20 @@
 #
 # Creates a tmux session with 1-4 side-by-side project columns. Each column
 # has claude on top, nvim in the middle, and a small shell at the bottom.
-# Supports hot-swapping any column's project and switching two columns.
+# Supports replacing any column's project and swapping two columns.
 #
 # USAGE:
 #   tmux_multi_dev_session.sh <1|2|3|4> [--force|-f] <path1> [path2] [path3] [path4]
-#   tmux_multi_dev_session.sh <1|2|3|4> --swap|-a <slot> <new_path>
-#   tmux_multi_dev_session.sh <1|2|3|4> --switch|-i <slot_a> <slot_b>
+#   tmux_multi_dev_session.sh <1|2|3|4> --replace|-r <slot> <new_path>
+#   tmux_multi_dev_session.sh <1|2|3|4> --swap|-s <slot_a> <slot_b>
 #
 # EXAMPLES:
 #   tmux_multi_dev_session.sh 1 ~/proj/a                      # 1-column session
 #   tmux_multi_dev_session.sh 3 ~/proj/a ~/proj/b ~/proj/c   # 3-column session
 #   tmux_multi_dev_session.sh 2 ~/proj/a ~/proj/b             # 2-column session
 #   tmux_multi_dev_session.sh 3 --force ~/proj/a ~/proj/b     # kill & recreate
-#   tmux_multi_dev_session.sh 3 --swap 2 ~/proj/new           # replace slot 2
-#   tmux_multi_dev_session.sh 3 --switch 1 3                  # swap slots 1 and 3
+#   tmux_multi_dev_session.sh 3 --replace 2 ~/proj/new         # replace slot 2
+#   tmux_multi_dev_session.sh 3 --swap 1 3                    # swap slots 1 and 3
 #
 # LAYOUT (3-column):
 #   ┌──────────┬──────────┬──────────┐
@@ -36,8 +36,8 @@
 # NOTES:
 #   - Session names are fixed: dev1 / dev2 / dev3 / dev4
 #   - Slot metadata stored as tmux session environment variables
-#   - --swap uses respawn-pane to preserve layout geometry
-#   - --switch uses swap-pane to physically move panes (no process killing)
+#   - --replace uses respawn-pane to preserve layout geometry
+#   - --swap uses swap-pane to physically move panes (no process killing)
 ################################################################################
 
 set -euo pipefail
@@ -65,8 +65,8 @@ _show_usage() {
     cat <<'EOF'
 Usage:
   tmux_multi_dev_session.sh <1|2|3|4> [--force|-f] <path1> [path2] [path3] [path4]
-  tmux_multi_dev_session.sh <1|2|3|4> --swap|-a [<slot>] <new_path>
-  tmux_multi_dev_session.sh <1|2|3|4> --switch|-i <slot_a> <slot_b>
+  tmux_multi_dev_session.sh <1|2|3|4> --replace|-r [<slot>] <new_path>
+  tmux_multi_dev_session.sh <1|2|3|4> --swap|-s <slot_a> <slot_b>
   tmux_multi_dev_session.sh <1|2|3|4> --kill|-k
 
 Aliases:
@@ -78,9 +78,9 @@ Examples:
   dev1 ~/proj/a                         # 1-column session
   dev3 ~/proj/a ~/proj/b ~/proj/c       # create 3-column session
   dev3 -f ~/proj/a ~/proj/b             # kill & recreate, pad last path
-  dev3 -a 2 ~/proj/new                  # replace slot 2's project
-  dev3 -i 1 3                           # swap slots 1 and 3
-  devn -i 1 3                           # same, auto-detects dev1/dev2/dev3/dev4
+  dev3 -r 2 ~/proj/new                  # replace slot 2's project
+  dev3 -s 1 3                           # swap slots 1 and 3
+  devn -s 1 3                           # same, auto-detects dev1/dev2/dev3/dev4
   devn -k                               # kill current multi-dev session
   devn                                  # show which devN this resolves to
 EOF
@@ -189,10 +189,10 @@ _get_env() {
 }
 
 ################################################################################
-# Swap Mode — replace a slot's project with a new one
+# Replace Mode — replace a slot's project with a new one
 ################################################################################
 
-_handle_swap() {
+_handle_replace() {
     local _session="$1"
     local _slot="$2"
     local _new_path="$3"
@@ -226,7 +226,7 @@ _handle_swap() {
         exit 1
     fi
 
-    log_info "Swapping slot $_slot to: $_new_path"
+    log_info "Replacing slot $_slot with: $_new_path"
 
     # Respawn all three panes — kills process, restarts shell, preserves geometry
     tmux respawn-pane -k -t "$_top_pane" -c "$_new_path"
@@ -249,14 +249,14 @@ _handle_swap() {
 
     tmux set-environment -t "$_session" "SLOT_${_slot}_PATH" "$_new_path"
 
-    log_success "Slot $_slot swapped to $(basename "$_new_path")"
+    log_success "Slot $_slot replaced with $(basename "$_new_path")"
 }
 
 ################################################################################
-# Switch Mode — swap two slots' positions with each other
+# Swap Mode — swap two slots' positions with each other
 ################################################################################
 
-_handle_switch() {
+_handle_swap() {
     local _session="$1"
     local _slot_a="$2"
     local _slot_b="$3"
@@ -479,11 +479,11 @@ if [ "${1:-}" = "--kill" ] || [ "${1:-}" = "-k" ]; then
     exit 0
 fi
 
-# Check for swap mode (replace a slot with a new project)
-if [ "${1:-}" = "--swap" ] || [ "${1:-}" = "-a" ]; then
+# Check for replace mode (replace a slot with a new project)
+if [ "${1:-}" = "--replace" ] || [ "${1:-}" = "-r" ]; then
     shift
     if [ $# -lt 1 ]; then
-        log_error "--swap requires at least <new_path>"
+        log_error "--replace requires at least <new_path>"
         _show_usage
         exit 2
     fi
@@ -497,15 +497,15 @@ if [ "${1:-}" = "--swap" ] || [ "${1:-}" = "-a" ]; then
         _SWAP_PATH="$1"
     fi
 
-    _handle_swap "dev${_COL_COUNT}" "$_SWAP_SLOT" "$_SWAP_PATH"
+    _handle_replace "dev${_COL_COUNT}" "$_SWAP_SLOT" "$_SWAP_PATH"
     exit 0
 fi
 
-# Check for switch mode (swap two slots with each other)
-if [ "${1:-}" = "--switch" ] || [ "${1:-}" = "-i" ]; then
+# Check for swap mode (swap two slots with each other)
+if [ "${1:-}" = "--swap" ] || [ "${1:-}" = "-s" ]; then
     shift
     if [ $# -lt 2 ]; then
-        log_error "--switch requires <slot_a> <slot_b>"
+        log_error "--swap requires <slot_a> <slot_b>"
         _show_usage
         exit 2
     fi
@@ -519,7 +519,7 @@ if [ "${1:-}" = "--switch" ] || [ "${1:-}" = "-i" ]; then
         fi
     done
 
-    _handle_switch "dev${_COL_COUNT}" "$_SLOT_A" "$_SLOT_B"
+    _handle_swap "dev${_COL_COUNT}" "$_SLOT_A" "$_SLOT_B"
     exit 0
 fi
 
