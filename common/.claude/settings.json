@@ -79,16 +79,25 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "feature-dev@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
-  },
-  "feedbackSurveyState": {
-    "lastShownTime": 1754086142848
-  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "feature-dev@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "trusty-cage@trusty-cage-plugin": true
+  },
+  "extraKnownMarketplaces": {
+    "trusty-cage-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "areese801/trusty-cage-plugin"
+      }
+    }
+  },
+  "feedbackSurveyState": {
+    "lastShownTime": 1754086142848
   }
 }

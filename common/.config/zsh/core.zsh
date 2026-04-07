@@ -100,7 +100,8 @@ PATH="$HOME/projects/snippets:$PATH"
 # else
 #   export EDITOR='nvim'
 # fi
-export EDITOR='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch $(uname -m)"
