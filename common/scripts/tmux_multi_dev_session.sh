@@ -11,7 +11,7 @@
 #   tmux_multi_dev_session.sh <1|2|3|4> --replace|-r <slot> <new_path>
 #   tmux_multi_dev_session.sh <1|2|3|4> --swap|-s <slot_a> <slot_b>
 #   tmux_multi_dev_session.sh <1|2|3|4> --drop|-d [--force|-f] [<slot>]
-#   tmux_multi_dev_session.sh <1|2|3|4> --grow|-g [<slot>] <new_path>
+#   tmux_multi_dev_session.sh <1|2|3|4> --grow|-g [<slot>] [<new_path>]
 #
 # EXAMPLES:
 #   tmux_multi_dev_session.sh 1 ~/proj/a                      # 1-column session
@@ -96,6 +96,7 @@ Examples:
   devn -d -f                            # drop last, kill conflicting session
   devn -g ~/proj/new                    # add column on the right (dev2 → dev3)
   devn -g 1 ~/proj/new                  # add column at position 1 (dev2 → dev3)
+  devn -g                               # add column using current slot's path
   devn -k                               # kill current multi-dev session
   devn                                  # show which devN this resolves to
 EOF
@@ -264,6 +265,27 @@ _rebalance_layout() {
         log_warn "Custom layout failed, falling back to tiled"
         tmux select-layout -t "$_session" tiled
     }
+}
+
+# Resolve the caller's TMUX_PANE to a slot number.
+# Returns the slot number on stdout, or empty string if not found.
+_current_slot() {
+    local _session="$1"
+    local _slot_count
+    _slot_count=$(_get_env "$_session" "SLOT_COUNT")
+    [ -z "$_slot_count" ] && return
+    [ -z "${TMUX_PANE:-}" ] && return
+
+    for (( _i=1; _i<=_slot_count; _i++ )); do
+        local _top _mid _bot
+        _top=$(_get_env "$_session" "SLOT_${_i}_TOP")
+        _mid=$(_get_env "$_session" "SLOT_${_i}_MID")
+        _bot=$(_get_env "$_session" "SLOT_${_i}_BOT")
+        if [ "$TMUX_PANE" = "$_top" ] || [ "$TMUX_PANE" = "$_mid" ] || [ "$TMUX_PANE" = "$_bot" ]; then
+            echo "$_i"
+            return
+        fi
+    done
 }
 
 # Store slot metadata in tmux session environment
@@ -852,16 +874,38 @@ if [ "${1:-}" = "--grow" ] || [ "${1:-}" = "-g" ]; then
         _GROW_FORCE="1"
         shift
     fi
+    # If no path provided, default to current slot's path
     if [ $# -lt 1 ]; then
-        log_error "--grow requires at least <new_path>"
-        _show_usage
-        exit 2
-    fi
-
+        _GROW_SLOT=$(( _COL_COUNT + 1 ))
+        _SESSION="dev${_COL_COUNT}"
+        _CUR_SLOT=$(_current_slot "$_SESSION")
+        if [ -n "$_CUR_SLOT" ]; then
+            _GROW_PATH=$(_get_env "$_SESSION" "SLOT_${_CUR_SLOT}_PATH")
+        fi
+        if [ -z "${_GROW_PATH:-}" ]; then
+            log_error "--grow requires <new_path> (could not detect current slot path)"
+            _show_usage
+            exit 2
+        fi
+        log_info "No path specified, using current slot's path: $(basename "$_GROW_PATH")"
     # If first arg is a number and second is a path, use positional insert
-    if [[ "$1" =~ ^[0-9]+$ ]] && [ $# -ge 2 ]; then
+    elif [[ "$1" =~ ^[0-9]+$ ]] && [ $# -ge 2 ]; then
         _GROW_SLOT="$1"
         _GROW_PATH="$2"
+    # If first arg is a number with no path, positional insert with current slot's path
+    elif [[ "$1" =~ ^[0-9]+$ ]] && [ $# -eq 1 ]; then
+        _GROW_SLOT="$1"
+        _SESSION="dev${_COL_COUNT}"
+        _CUR_SLOT=$(_current_slot "$_SESSION")
+        if [ -n "$_CUR_SLOT" ]; then
+            _GROW_PATH=$(_get_env "$_SESSION" "SLOT_${_CUR_SLOT}_PATH")
+        fi
+        if [ -z "${_GROW_PATH:-}" ]; then
+            log_error "--grow <slot> requires <new_path> (could not detect current slot path)"
+            _show_usage
+            exit 2
+        fi
+        log_info "No path specified, using current slot's path: $(basename "$_GROW_PATH")"
     else
         _GROW_SLOT=$(( _COL_COUNT + 1 ))
         _GROW_PATH="$1"
