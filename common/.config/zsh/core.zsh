@@ -87,7 +87,7 @@ setopt HIST_IGNORE_SPACE
 PATH="$HOME/scripts:$PATH"
 
 # Add snippets repo to PATH (browse, get, search, notes, snippets)
-PATH="$HOME/projects/snippets:$PATH"
+PATH="$HOME/projects/personal/snippets:$PATH"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -252,9 +252,9 @@ alias a='deactivate 2>/dev/null; . $(find . -type f -name "activate" -exec realp
 # alias about='bash ~/scripts/dbt_about.sh'
 # alias c='bash ~/scripts/dbt_compile_and_link.sh'
 # Snippets TUI - launches dev session with TUI in bottom-right pane
-alias c='cd ~/projects/snippets && tmux_dev_session.sh snippets "$(pwd -P)" "./snippets"'
+alias c='cd ~/projects/personal/snippets && tmux_dev_session.sh snippets "$(pwd -P)" "./snippets"'
 # Snippets search - multi-term AND search (e.g., `search select transaction`)
-alias search='~/projects/snippets/search'
+alias search='~/projects/personal/snippets/search'
 # Claude Code - try to continue previous session, fall back to fresh
 alias cc='claude --continue || claude'
 alias ccd='claude --continue --enable-auto-mode || claude --enable-auto-mode'
@@ -384,7 +384,7 @@ alias DT='cd ~/Desktop && ls -lahG'
 alias duck='cd ~/projects/duck-data/ && ls -lahG'
 alias f='yazi'
 # alias g='bash cbgraph.sh'  # Commented out to use snippets get
-alias g='~/projects/snippets/get'
+alias g='~/projects/personal/snippets/get'
 alias gb=' git --no-pager branch'
 alias gcm='git checkout main'
 alias gd='git diff --cached' # --cached arg shows diffs for files that are staged for commit as well as those that aren't
@@ -412,15 +412,16 @@ alias pbj='paste | jq | clip'
 alias public-ip='curl https://ipinfo.io/ip'
 alias rc='sublime ~/.zshrc'
 # alias s='sublime .'  # Commented out to use snippets search
-alias s='~/projects/snippets/search'
-alias get='~/projects/snippets/get'
-alias b='~/projects/snippets/browse'
-alias browse='~/projects/snippets/browse'
-alias notes='~/projects/snippets/notes'
-alias snippets='cd ~/projects/snippets && ./snippets'
-alias snip='cd ~/projects/snippets && ./snippets'
+alias s='~/projects/personal/snippets/search'
+alias get='~/projects/personal/snippets/get'
+alias b='~/projects/personal/snippets/browse'
+alias browse='~/projects/personal/snippets/browse'
+alias notes='~/projects/personal/snippets/notes'
+alias snippets='cd ~/projects/personal/snippets && ./snippets'
+alias snip='cd ~/projects/personal/snippets && ./snippets'
 alias scripts='cd ~/scripts && ls -lahG'
 alias src='source ~/.zprofile && source ~/.zshrc'
+alias t='cd ~/projects/cinch/tap_repositories && ls -lahG'
 alias tcomp='bcomp -fv="Table Compare"'
 alias tm='tmux'
 alias tml='tmux ls'
