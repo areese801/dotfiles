@@ -120,6 +120,8 @@ Each column has 3 rows: claude (top ~30%), nvim (middle ~60%), shell (bottom ~10
 **Operations:**
 - `dev3 --replace <slot> <new_path>` — replace a column's project (respawn-pane)
 - `dev3 --swap <slot_a> <slot_b>` — swap two columns' positions (swap-pane)
+- `devn --drop [slot]` — remove a column (default: last), renumber, rename session
+- `devn --grow [slot] <path>` — add a column (default: rightmost), rename session
 - `dev3` (no args) — reattach to existing session
 
 ### Keeping Variants in Sync

@@ -4,12 +4,14 @@
 #
 # Creates a tmux session with 1-4 side-by-side project columns. Each column
 # has claude on top, nvim in the middle, and a small shell at the bottom.
-# Supports replacing any column's project and swapping two columns.
+# Supports replacing, swapping, dropping, and growing columns.
 #
 # USAGE:
 #   tmux_multi_dev_session.sh <1|2|3|4> [--force|-f] <path1> [path2] [path3] [path4]
 #   tmux_multi_dev_session.sh <1|2|3|4> --replace|-r <slot> <new_path>
 #   tmux_multi_dev_session.sh <1|2|3|4> --swap|-s <slot_a> <slot_b>
+#   tmux_multi_dev_session.sh <1|2|3|4> --drop|-d [<slot>]
+#   tmux_multi_dev_session.sh <1|2|3|4> --grow|-g [<slot>] <new_path>
 #
 # EXAMPLES:
 #   tmux_multi_dev_session.sh 1 ~/proj/a                      # 1-column session
@@ -18,6 +20,10 @@
 #   tmux_multi_dev_session.sh 3 --force ~/proj/a ~/proj/b     # kill & recreate
 #   tmux_multi_dev_session.sh 3 --replace 2 ~/proj/new         # replace slot 2
 #   tmux_multi_dev_session.sh 3 --swap 1 3                    # swap slots 1 and 3
+#   tmux_multi_dev_session.sh 3 --drop                        # drop last column (→ dev2)
+#   tmux_multi_dev_session.sh 3 --drop 2                      # drop slot 2 (→ dev2)
+#   tmux_multi_dev_session.sh 2 --grow ~/proj/c               # add column (→ dev3)
+#   tmux_multi_dev_session.sh 2 --grow 1 ~/proj/c             # add at position 1 (→ dev3)
 #
 # LAYOUT (3-column):
 #   ┌──────────┬──────────┬──────────┐
@@ -38,6 +44,8 @@
 #   - Slot metadata stored as tmux session environment variables
 #   - --replace uses respawn-pane to preserve layout geometry
 #   - --swap uses swap-pane to physically move panes (no process killing)
+#   - --drop kills panes and renumbers remaining slots
+#   - --grow splits a new column, then optionally swaps into position
 ################################################################################
 
 set -euo pipefail
@@ -67,6 +75,8 @@ Usage:
   tmux_multi_dev_session.sh <1|2|3|4> [--force|-f] <path1> [path2] [path3] [path4]
   tmux_multi_dev_session.sh <1|2|3|4> --replace|-r [<slot>] <new_path>
   tmux_multi_dev_session.sh <1|2|3|4> --swap|-s <slot_a> <slot_b>
+  tmux_multi_dev_session.sh <1|2|3|4> --drop|-d [<slot>]
+  tmux_multi_dev_session.sh <1|2|3|4> --grow|-g [<slot>] <new_path>
   tmux_multi_dev_session.sh <1|2|3|4> --kill|-k
 
 Aliases:
@@ -80,7 +90,10 @@ Examples:
   dev3 -f ~/proj/a ~/proj/b             # kill & recreate, pad last path
   dev3 -r 2 ~/proj/new                  # replace slot 2's project
   dev3 -s 1 3                           # swap slots 1 and 3
-  devn -s 1 3                           # same, auto-detects dev1/dev2/dev3/dev4
+  devn -d                               # drop last column (dev3 → dev2)
+  devn -d 2                             # drop slot 2, renumber remaining
+  devn -g ~/proj/new                    # add column on the right (dev2 → dev3)
+  devn -g 1 ~/proj/new                  # add column at position 1 (dev2 → dev3)
   devn -k                               # kill current multi-dev session
   devn                                  # show which devN this resolves to
 EOF
@@ -317,6 +330,165 @@ _handle_swap() {
 }
 
 ################################################################################
+# Drop Mode — remove a column from the session
+################################################################################
+
+_handle_drop() {
+    local _session="$1"
+    local _slot="$2"
+    local _slot_count
+
+    if ! tmux has-session -t "$_session" 2>/dev/null; then
+        log_error "Session '$_session' does not exist."
+        exit 1
+    fi
+
+    _slot_count=$(_get_env "$_session" "SLOT_COUNT")
+    if [ -z "$_slot_count" ]; then
+        log_error "Session '$_session' has no SLOT_COUNT metadata. Was it created by this script?"
+        exit 1
+    fi
+
+    if [ "$_slot_count" -le 1 ]; then
+        log_error "Cannot drop below 1 column. Use --kill to remove the session."
+        exit 1
+    fi
+
+    if [ "$_slot" -lt 1 ] || [ "$_slot" -gt "$_slot_count" ]; then
+        log_error "Slot $_slot is out of range (1-${_slot_count})"
+        exit 1
+    fi
+
+    local _path
+    _path=$(_get_env "$_session" "SLOT_${_slot}_PATH")
+    log_info "Dropping slot $_slot ($(basename "$_path")) from $_session..."
+
+    # Kill the 3 panes for this slot
+    local _top_pane _mid_pane _bot_pane
+    _top_pane=$(_get_env "$_session" "SLOT_${_slot}_TOP")
+    _mid_pane=$(_get_env "$_session" "SLOT_${_slot}_MID")
+    _bot_pane=$(_get_env "$_session" "SLOT_${_slot}_BOT")
+
+    # Kill in reverse order (bottom first) to avoid pane ID shifts
+    tmux kill-pane -t "$_bot_pane"
+    tmux kill-pane -t "$_mid_pane"
+    tmux kill-pane -t "$_top_pane"
+
+    # Shift metadata down: slots above the removed one slide down by 1
+    local _new_count=$(( _slot_count - 1 ))
+    for (( _i=_slot; _i<=_new_count; _i++ )); do
+        local _next=$(( _i + 1 ))
+        local _next_top _next_mid _next_bot _next_path
+        _next_top=$(_get_env "$_session" "SLOT_${_next}_TOP")
+        _next_mid=$(_get_env "$_session" "SLOT_${_next}_MID")
+        _next_bot=$(_get_env "$_session" "SLOT_${_next}_BOT")
+        _next_path=$(_get_env "$_session" "SLOT_${_next}_PATH")
+        _store_slot_metadata "$_session" "$_i" "$_next_top" "$_next_mid" "$_next_bot" "$_next_path"
+    done
+
+    # Unset the old last slot's metadata
+    tmux set-environment -t "$_session" -u "SLOT_${_slot_count}_TOP"
+    tmux set-environment -t "$_session" -u "SLOT_${_slot_count}_MID"
+    tmux set-environment -t "$_session" -u "SLOT_${_slot_count}_BOT"
+    tmux set-environment -t "$_session" -u "SLOT_${_slot_count}_PATH"
+
+    # Update slot count
+    tmux set-environment -t "$_session" "SLOT_COUNT" "$_new_count"
+
+    # Rename session to match new column count
+    local _new_session="dev${_new_count}"
+    if [ "$_session" != "$_new_session" ]; then
+        tmux rename-session -t "$_session" "$_new_session"
+    fi
+
+    # Rebalance layout
+    tmux select-layout -t "$_new_session" even-horizontal
+
+    log_success "Dropped slot $_slot. Session is now $_new_session with $_new_count columns."
+}
+
+################################################################################
+# Grow Mode — add a column to the session
+################################################################################
+
+_handle_grow() {
+    local _session="$1"
+    local _target_slot="$2"
+    local _new_path="$3"
+    local _slot_count
+
+    if ! tmux has-session -t "$_session" 2>/dev/null; then
+        log_error "Session '$_session' does not exist."
+        exit 1
+    fi
+
+    _slot_count=$(_get_env "$_session" "SLOT_COUNT")
+    if [ -z "$_slot_count" ]; then
+        log_error "Session '$_session' has no SLOT_COUNT metadata. Was it created by this script?"
+        exit 1
+    fi
+
+    if [ "$_slot_count" -ge 4 ]; then
+        log_error "Cannot grow beyond 4 columns."
+        exit 1
+    fi
+
+    _new_path=$(_resolve_project_path "$_new_path")
+    local _new_count=$(( _slot_count + 1 ))
+    local _new_slot="$_new_count"
+
+    log_info "Growing $_session: adding column for $(basename "$_new_path")..."
+
+    # Split the last pane horizontally to create a new column
+    local _last_bot
+    _last_bot=$(_get_env "$_session" "SLOT_${_slot_count}_BOT")
+    local _new_top
+    _new_top=$(tmux split-window -h -t "$_last_bot" -c "$_new_path" -P -F '#{pane_id}')
+
+    # Rebalance columns before vertical splits (so percentages are relative to correct height)
+    tmux select-layout -t "$_session" even-horizontal
+
+    # Split the new column vertically into 3 rows (same proportions as creation)
+    local _new_mid
+    _new_mid=$(tmux split-window -v -t "$_new_top" -c "$_new_path" -l 70% -P -F '#{pane_id}')
+    local _new_bot
+    _new_bot=$(tmux split-window -v -t "$_new_mid" -c "$_new_path" -l 15% -P -F '#{pane_id}')
+
+    # Store metadata for the new slot
+    tmux set-environment -t "$_session" "SLOT_COUNT" "$_new_count"
+    _store_slot_metadata "$_session" "$_new_slot" "$_new_top" "$_new_mid" "$_new_bot" "$_new_path"
+
+    # Rename session to match new column count
+    local _new_session="dev${_new_count}"
+    if [ "$_session" != "$_new_session" ]; then
+        tmux rename-session -t "$_session" "$_new_session"
+    fi
+
+    # Rebalance layout after all splits
+    tmux select-layout -t "$_new_session" even-horizontal
+
+    # Wait for shells and launch applications
+    _wait_for_shell "$_new_top"
+    _wait_for_shell "$_new_mid"
+    _wait_for_shell "$_new_bot"
+
+    _launch_claude "$_new_top" "$_new_path"
+    _launch_nvim "$_new_mid" "$_new_path"
+    _launch_shell "$_new_bot" "$_new_path"
+
+    sleep 1
+    _open_neotree "$_new_mid"
+
+    # If a target position was specified (not the last slot), swap into position
+    if [ "$_target_slot" -ne "$_new_slot" ]; then
+        log_info "Moving new column to slot $_target_slot..."
+        _handle_swap "$_new_session" "$_new_slot" "$_target_slot"
+    fi
+
+    log_success "Session is now $_new_session with $_new_count columns."
+}
+
+################################################################################
 # Main: Create Session
 ################################################################################
 
@@ -520,6 +692,41 @@ if [ "${1:-}" = "--swap" ] || [ "${1:-}" = "-s" ]; then
     done
 
     _handle_swap "dev${_COL_COUNT}" "$_SLOT_A" "$_SLOT_B"
+    exit 0
+fi
+
+# Check for drop mode (remove a column)
+if [ "${1:-}" = "--drop" ] || [ "${1:-}" = "-d" ]; then
+    shift
+    # Default to last slot if none specified
+    if [ $# -ge 1 ] && [[ "$1" =~ ^[0-9]+$ ]]; then
+        _DROP_SLOT="$1"
+    else
+        _DROP_SLOT="$_COL_COUNT"
+    fi
+    _handle_drop "dev${_COL_COUNT}" "$_DROP_SLOT"
+    exit 0
+fi
+
+# Check for grow mode (add a column)
+if [ "${1:-}" = "--grow" ] || [ "${1:-}" = "-g" ]; then
+    shift
+    if [ $# -lt 1 ]; then
+        log_error "--grow requires at least <new_path>"
+        _show_usage
+        exit 2
+    fi
+
+    # If first arg is a number and second is a path, use positional insert
+    if [[ "$1" =~ ^[0-9]+$ ]] && [ $# -ge 2 ]; then
+        _GROW_SLOT="$1"
+        _GROW_PATH="$2"
+    else
+        _GROW_SLOT=$(( _COL_COUNT + 1 ))
+        _GROW_PATH="$1"
+    fi
+
+    _handle_grow "dev${_COL_COUNT}" "$_GROW_SLOT" "$_GROW_PATH"
     exit 0
 fi
 
