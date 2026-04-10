@@ -43,3 +43,6 @@ fi
 # Google Cloud SDK
 [[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
 [[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
+
+# Created by `pipx` on 2026-04-09 20:46:41
+export PATH="$PATH:/Users/areese/.local/bin"
