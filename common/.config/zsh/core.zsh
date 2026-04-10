@@ -247,6 +247,8 @@ entity_data() {
 ###
 
 alias ff='fzf'
+# ewf - Scan *.log files in cwd for errors/warnings/failures
+alias ewf='for f in $(ls *.log); do echo && echo && echo && echo $f && cat $f | grep -i -E "(error|warn|fail)"; done'
 alias penv='python3 -m venv venv'
 alias a='deactivate 2>/dev/null; . $(find . -type f -name "activate" -exec realpath {} + | awk -v pwd="$(realpath .)" '\''{print length($0), $0}'\'' | sort -n | cut -d " " -f 2- | head -n 1) && which python'
 # alias about='bash ~/scripts/dbt_about.sh'
