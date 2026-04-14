@@ -339,3 +339,12 @@ stow fedora
 - Always use `stow -n <package>` first to preview changes
 - The `--adopt` method is safer than manual file removal
 - Packages don't conflict if they manage different paths
+
+## Git Workflow
+
+**Always use feature branches and PRs** — never commit directly to main.
+
+1. Create a feature branch before making changes (`feature/`, `fix/`, `chore/`)
+2. Commit on the feature branch
+3. Push and open a PR via `gh pr create`
+4. After merge, suggest `clean` to tidy up stale branches
