@@ -1,0 +1,123 @@
+# Espanso Text Expansions
+# Migrated from Alfred snippets on 2026-04-09
+# Trigger prefix: ~!
+#
+# espanso docs: https://espanso.org/docs/matches/basics/
+
+matches:
+
+  # ============================================================================
+  # Date / Time
+  # ============================================================================
+
+  - trigger: "~!d"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y-%m-%d"
+
+  # ============================================================================
+  # Personal
+  # ============================================================================
+
+  - trigger: "~!e"
+    replace: "areese801@gmail.com"
+
+  # ============================================================================
+  # SQL
+  # ============================================================================
+
+  - trigger: "~!S"
+    replace: "SELECT\n\tt.*\nFROM\n\t{{clip}} t\n-- WHERE\n\nLIMIT 100;"
+    vars:
+      - name: clip
+        type: shell
+        params:
+          cmd: "pbpaste | tr '[:upper:]' '[:lower:]'"
+
+  - trigger: "~!mbasgb"
+    replace: "megabytes as gigabytes"
+
+  - trigger: "~!sah"
+    replace: "seconds as hours"
+
+  # ============================================================================
+  # Snowflake
+  # ============================================================================
+
+  - trigger: "~!u"
+    replace: "SHOW DATABASES;\nUSE DATABASE foo;\nSHOW SCHEMAS;\nUSE SCHEMA bar;\nSHOW OBJECTS;"
+
+  # ============================================================================
+  # dbt
+  # ============================================================================
+
+  - trigger: "~!ref"
+    replace: "{{ ref('') }}"
+
+  - trigger: "~!source"
+    replace: "{{ source('<source_name>', '<table_name>') }}"
+
+  - trigger: "~!compile"
+    replace: "dbt compile --select {{clip}}"
+    vars:
+      - name: clip
+        type: shell
+        params:
+          cmd: "pbpaste | tr '[:upper:]' '[:lower:]'"
+
+  # ============================================================================
+  # Jira
+  # ============================================================================
+
+  - trigger: "~!j"
+    replace: |
+      # Stakeholders
+      List all Stakeholders Here. (@-tagging them as it makes sense)
+
+      # Core Problem Statement
+
+      Describe the problem that this card addresses here in a few sentences. Think:  TL;DR
+
+      # Details
+      Put more details here. This section complements the Core Problem Statement (TL;DR) section above
+
+      # See Also:
+      Use this section to link out to other artifacts, conversations, documents, lucid charts, slack channels, etc.
+
+  # ============================================================================
+  # Gmail
+  # ============================================================================
+
+  - trigger: "~!from"
+    replace: "-label:chat from:"
+
+  # ============================================================================
+  # Regex Patterns
+  # ============================================================================
+
+  # Find single-line commas (for find/replace: reformat to leading commas)
+  - trigger: "~!re,f"
+    replace: "((?<!\\n), )"
+
+  # Replace single-line commas with leading commas
+  - trigger: "~!re,r"
+    replace: "\\n\\t, "
+
+  # Match underscore, dash, or space (useful for fuzzy name matching)
+  - trigger: "~!_"
+    replace: "(\\ |_|-)?"
+
+  # Negative match pattern (exclude lines containing a word)
+  - trigger: "~!notmatch"
+    replace: "^((?!badword).)*$"
+
+  # ============================================================================
+  # Shell
+  # ============================================================================
+
+  # Pipe SnowSQL output to clean TSV
+  - trigger: "~!sedtsv"
+    replace: " | grep -v -E '^$' | grep -E '\\s*[\\|\\+]' | grep -v -E '^(\\+|\\|)[+-]+(\\+|\\|)$' | grep -v -E '^[+ -]+$' | sed 's/^[[:space:]]*|[[:space:]]//g' | sed 's/[[:space:]]*|[[:space:]]*$//g' | sed 's/[[:space:]]*|[[:space:]]*/\\t/g'"
