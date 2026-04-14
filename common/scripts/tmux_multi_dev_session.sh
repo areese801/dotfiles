@@ -184,87 +184,61 @@ _launch_shell() {
 }
 
 # Rebalance layout after drop/grow — rebuilds the column-with-rows structure.
-# tmux's "even-horizontal" treats every pane as a peer and flattens the grid.
-# Instead, we build a custom layout string that groups each slot's 3 panes
-# into a vertical stack within evenly-sized horizontal columns.
+#
+# Strategy: break all surviving panes out into their own windows, then
+# rebuild the grid from scratch using the same split pattern as initial
+# session creation. This avoids fragile custom layout strings — we let
+# tmux handle geometry natively.
 _rebalance_layout() {
     local _session="$1"
     local _col_count
     _col_count=$(_get_env "$_session" "SLOT_COUNT")
 
-    # Get the window dimensions
-    local _win_width _win_height
-    _win_width=$(tmux display-message -t "$_session" -p '#{window_width}')
-    _win_height=$(tmux display-message -t "$_session" -p '#{window_height}')
-
-    # Calculate column width (equal distribution)
-    local _col_width=$(( _win_width / _col_count ))
-
-    # Row heights within each column: ~30% top, ~60% mid, ~10% bot
-    local _top_height=$(( _win_height * 30 / 100 ))
-    local _mid_height=$(( _win_height * 60 / 100 ))
-    local _bot_height=$(( _win_height - _top_height - _mid_height ))
-
-    # Build the custom layout string
-    # Format: checksum,WxH,x,y{col1,col2,...} where each col is WxH,x,y[row1,row2,row3]
-    local _layout_cols=""
+    # Collect all pane IDs in slot order (top, mid, bot for each slot)
+    local _all_panes=()
+    local _all_paths=()
     for (( _i=1; _i<=_col_count; _i++ )); do
-        local _top_id _mid_id _bot_id
-        _top_id=$(_get_env "$_session" "SLOT_${_i}_TOP")
-        _mid_id=$(_get_env "$_session" "SLOT_${_i}_MID")
-        _bot_id=$(_get_env "$_session" "SLOT_${_i}_BOT")
-
-        # Strip the % prefix from pane IDs for the layout string
-        _top_id="${_top_id#%}"
-        _mid_id="${_mid_id#%}"
-        _bot_id="${_bot_id#%}"
-
-        local _x=$(( (_i - 1) * (_col_width + 1) ))
-        local _col_w="$_col_width"
-        # Last column gets remaining width
-        if [ "$_i" -eq "$_col_count" ]; then
-            _col_w=$(( _win_width - _x ))
-        fi
-
-        local _y_top=0
-        local _y_mid=$(( _top_height + 1 ))
-        local _y_bot=$(( _top_height + _mid_height + 2 ))
-        local _actual_bot_height=$(( _win_height - _y_bot ))
-
-        local _col="${_col_w}x${_win_height},${_x},0"
-        _col="${_col}[${_col_w}x${_top_height},${_x},${_y_top},${_top_id}"
-        _col="${_col},${_col_w}x${_mid_height},${_x},${_y_mid},${_mid_id}"
-        _col="${_col},${_col_w}x${_actual_bot_height},${_x},${_y_bot},${_bot_id}]"
-
-        if [ -n "$_layout_cols" ]; then
-            _layout_cols="${_layout_cols},"
-        fi
-        _layout_cols="${_layout_cols}${_col}"
+        _all_panes+=("$(_get_env "$_session" "SLOT_${_i}_TOP")")
+        _all_panes+=("$(_get_env "$_session" "SLOT_${_i}_MID")")
+        _all_panes+=("$(_get_env "$_session" "SLOT_${_i}_BOT")")
+        _all_paths+=("$(_get_env "$_session" "SLOT_${_i}_PATH")")
     done
 
-    local _layout="${_win_width}x${_win_height},0,0{${_layout_cols}}"
+    local _total_panes=${#_all_panes[@]}
 
-    # tmux requires a checksum prefix — use a dummy one and let tmux recalculate
-    # Actually tmux validates the checksum, so we need to compute it.
-    # Simpler approach: use select-layout with the layout but let tmux fix it.
-    # The checksum is a 4-hex-digit value. We can compute it:
-    local _csum=0
-    local _len=${#_layout}
-    for (( _c=0; _c<_len; _c++ )); do
-        local _char="${_layout:$_c:1}"
-        local _ord
-        _ord=$(printf '%d' "'$_char")
-        _csum=$(( (_csum >> 1) + ((_csum & 1) << 15) + _ord ))
-        _csum=$(( _csum & 0xFFFF ))
+    # Step 1: Move all panes except the first into temporary windows.
+    # This gives us a clean slate — one pane in window 0.
+    local _temp_windows=()
+    for (( _p=1; _p<_total_panes; _p++ )); do
+        tmux break-pane -d -s "${_all_panes[$_p]}" -t "$_session"
+        # break-pane creates a new window; track it by pane ID
     done
-    local _csum_hex
-    _csum_hex=$(printf '%04x' "$_csum")
 
-    tmux select-layout -t "$_session" "${_csum_hex},${_layout}" 2>/dev/null || {
-        # Fallback: if custom layout fails, at least try tiled
-        log_warn "Custom layout failed, falling back to tiled"
-        tmux select-layout -t "$_session" tiled
-    }
+    # Step 2: Rebuild columns — join panes back horizontally for each column's
+    # first pane (the "top" pane), then split vertically for mid and bot.
+
+    # First column's top pane is already in the main window.
+    # Join remaining columns' top panes as horizontal splits.
+    for (( _i=2; _i<=_col_count; _i++ )); do
+        local _top_idx=$(( (_i - 1) * 3 ))
+        tmux join-pane -h -t "${_all_panes[0]}" -s "${_all_panes[$_top_idx]}" -l 50%
+    done
+
+    # Even out the columns
+    tmux select-layout -t "$_session" even-horizontal
+
+    # Now join mid and bot panes as vertical splits within each column
+    for (( _i=1; _i<=_col_count; _i++ )); do
+        local _top_idx=$(( (_i - 1) * 3 ))
+        local _mid_idx=$(( _top_idx + 1 ))
+        local _bot_idx=$(( _top_idx + 2 ))
+
+        # Join mid pane below top pane (70% of column height)
+        tmux join-pane -v -t "${_all_panes[$_top_idx]}" -s "${_all_panes[$_mid_idx]}" -l 70%
+
+        # Join bot pane below mid pane (15% of remaining)
+        tmux join-pane -v -t "${_all_panes[$_mid_idx]}" -s "${_all_panes[$_bot_idx]}" -l 15%
+    done
 }
 
 # Resolve the caller's TMUX_PANE to a slot number.
@@ -504,9 +478,10 @@ _handle_drop() {
     _bot_pane=$(_get_env "$_session" "SLOT_${_slot}_BOT")
 
     # Kill in reverse order (bottom first) to avoid pane ID shifts
-    tmux kill-pane -t "$_bot_pane"
-    tmux kill-pane -t "$_mid_pane"
-    tmux kill-pane -t "$_top_pane"
+    # Tolerate already-dead panes (e.g., process exited before drop)
+    tmux kill-pane -t "$_bot_pane" 2>/dev/null || true
+    tmux kill-pane -t "$_mid_pane" 2>/dev/null || true
+    tmux kill-pane -t "$_top_pane" 2>/dev/null || true
 
     # Shift metadata down: slots above the removed one slide down by 1
     for (( _i=_slot; _i<=_new_count; _i++ )); do
