@@ -1,0 +1,8 @@
+# Espanso Configuration
+# https://espanso.org/docs/configuration/
+
+# Show notification on expansion
+show_notifications: false
+
+# Search bar shortcut (default Alt+Space conflicts with Alfred)
+search_shortcut: "CTRL+SPACE"

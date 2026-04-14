@@ -247,6 +247,8 @@ entity_data() {
 ###
 
 alias ff='fzf'
+# ewf - Scan *.log files in cwd for errors/warnings/failures
+alias ewf='for f in $(ls *.log); do echo && echo && echo && echo $f && cat $f | grep -i -E "(error|warn|fail)"; done'
 alias penv='python3 -m venv venv'
 alias a='deactivate 2>/dev/null; . $(find . -type f -name "activate" -exec realpath {} + | awk -v pwd="$(realpath .)" '\''{print length($0), $0}'\'' | sort -n | cut -d " " -f 2- | head -n 1) && which python'
 # alias about='bash ~/scripts/dbt_about.sh'
@@ -382,7 +384,6 @@ alias dotfiles='cd ~/.dotfiles && ls -lahG && git status'
 alias DL='cd ~/Downloads && ls -lahG'
 alias DT='cd ~/Desktop && ls -lahG'
 alias duck='cd ~/projects/duck-data/ && ls -lahG'
-alias f='yazi'
 # alias g='bash cbgraph.sh'  # Commented out to use snippets get
 alias g='~/projects/personal/snippets/get'
 alias gb=' git --no-pager branch'
@@ -513,7 +514,6 @@ alias vz='vi ~/.zshrc'
 alias word_crawl='~/projects/personal/word_crawl/venv/bin/python3 ~/projects/personal/word_crawl/word_crawl.py -c ~/projects/personal/word_crawl/word_crawl.conf -s $(pwd -P)'
 alias web='cd ~/projects/duck-data/website/ && ls -lahG'
 alias x='cd ~/projects/onXmaps/ && ls -lahG'
-alias y='yazi'
 alias ya='cd ~/projects/yggdrasil-analytics/template_dagster/ && ls -lahG && git status'
 # alias z='zed .'
 alias zz='zed ~/.zshrc'
