@@ -1,7 +1,7 @@
 # Global Claude Code Configuration
 
-**Last Updated**: 2026-02-28
-**Next Review**: 2026-03-30 (30 days)
+**Last Updated**: 2026-04-14
+**Next Review**: 2026-05-14 (30 days)
 
 This file provides universal guidance to Claude Code across all projects.
 
@@ -15,28 +15,21 @@ When 30+ days have passed since "Last Updated":
 3. Update or remove sections that are no longer relevant
 4. Update the "Last Updated" and "Next Review" dates
 
-### Last Update Summary (2026-02-28)
+### Last Update Summary (2026-04-14)
 
-Consolidated conventions from 13 project-specific CLAUDE.md files:
+Review and cleanup of stale references:
 
-**Added to Global Config:**
-- Python coding standards (type hints, error handling, Black formatting)
-- Development workflow (Makefiles, venv, .env files, underscore conventions)
-- .gitignore best practices (TODO.md ignored, secrets-first approach)
-- Database conventions (dbt-focused, suggest not enforce)
-- Documentation standards (CLAUDE.md, README.md, TODO.md)
-- Command permissions (18 auto-approved read-only commands)
-- Shell script conventions (from postgres-writeback patterns)
-- API integration patterns (REST + GraphQL introspection workflow)
-
-**Skipped for Now:**
-- Testing standards (revisit if needed)
-- Frontend conventions (rarely used)
+**Fixed:**
+- Snippets path: updated from `~/projects/snippets` to `~/projects/personal/snippets`
+- Settings file reference: auto-approved commands are in `settings.json` (not `settings.local.json`)
+- Command count: 22 auto-approved commands (was 18)
+- Removed stale reference to `CLAUDE_RECOMMENDATIONS.md` (file no longer exists)
+- Strengthened git workflow: always use feature branches and PRs
 
 **Configuration Files:**
-- `~/.claude/CLAUDE.md` - This file (987 lines, 28KB)
-- `~/.claude/settings.local.json` - Command auto-approval (18 commands)
-- `~/.claude/CLAUDE_RECOMMENDATIONS.md` - Full recommendations for reference
+- `~/.claude/CLAUDE.md` - This file
+- `~/.claude/settings.json` - Auto-approved commands (22), hooks, plugins
+- `~/.claude/settings.local.json` - Per-machine MCP permissions
 
 ---
 
@@ -368,7 +361,7 @@ For complete dbt project standards, see the project-specific CLAUDE.md in your d
 
 The following read-only commands are pre-approved and do not require user permission. These commands are safe, non-destructive, and commonly used for exploration and analysis.
 
-**Configuration**: Auto-approval is configured in `~/.claude/settings.local.json`
+**Configuration**: Auto-approval is configured in `~/.claude/settings.json`
 
 ### Pre-Approved Command Categories
 
@@ -431,7 +424,7 @@ The following commands always require user permission, even if they appear read-
 
 ### Modifying Auto-Approved Commands
 
-To add or remove commands from the auto-approval list, edit `~/.claude/settings.local.json`:
+To add or remove commands from the auto-approval list, edit `~/.claude/settings.json`:
 
 ```json
 {
@@ -449,7 +442,7 @@ To add or remove commands from the auto-approval list, edit `~/.claude/settings.
 - `Bash(git status:*)` - Auto-approve specific git subcommand
 - Wildcard `*` matches any arguments
 
-**Note:** Changes to `settings.local.json` take effect immediately; no restart required.
+**Note:** Changes to `settings.json` take effect immediately; no restart required.
 
 ---
 
@@ -513,18 +506,14 @@ stow -R common
 **Bad pattern:**
 > Silently running `git commit` as part of a command chain
 
-### Prompt for Feature Branches on Main
+### Always Use Feature Branches and PRs
 
-Before making changes on the main branch (or master - check `git config init.defaultBranch` or inspect remote), prompt the user to create a feature branch:
+**Never commit directly to main.** Always create a feature branch, commit there, push, and open a PR via `gh pr create`.
 
-> "You're on the main branch. Would you like to create a feature branch for these changes? This allows you to merge via PR when done.
->
-> Also, are you working on a specific Jira card?"
+If changes are being made on main, create a feature branch immediately before modifying any files.
 
-**When to prompt:**
-- Before the first file modification in a session
-- When the user asks to implement a feature or fix
-- NOT for trivial one-off changes the user explicitly wants on main
+**When starting work, ask:**
+> "Are you working on a specific Jira card?"
 
 **Branch naming:**
 - If Jira card: `DATA-1234_fix_specific_issue` (card number + brief description)
@@ -1146,24 +1135,24 @@ Examples:
 
 ## Snippets Repository
 
-The user maintains a personal code snippets repository at `~/projects/snippets` with script-driven CRUD operations designed for both human and AI (Claude Code) usage.
+The user maintains a personal code snippets repository at `~/projects/personal/snippets` with script-driven CRUD operations designed for both human and AI (Claude Code) usage.
 
 ### Repository Location
 
-- **Path**: `~/projects/snippets`
-- **Documentation**: See `~/projects/snippets/CLAUDE.md` for full integration guide
+- **Path**: `~/projects/personal/snippets`
+- **Documentation**: See `~/projects/personal/snippets/CLAUDE.md` for full integration guide
 
 ### Quick Reference
 
 **Copy snippet to clipboard by UUID:**
 ```bash
-~/projects/snippets/get <uuid>
-~/projects/snippets/get --list  # List all IDs
+~/projects/personal/snippets/get <uuid>
+~/projects/personal/snippets/get --list  # List all IDs
 ```
 
 **Add new snippet (Claude Code):**
 ```bash
-~/projects/snippets/.scripts/add.py \
+~/projects/personal/snippets/.scripts/add.py \
   --title "My Snippet" \
   --language sql \
   --tags "tag1,tag2" \
@@ -1174,8 +1163,8 @@ The user maintains a personal code snippets repository at `~/projects/snippets` 
 
 **Search snippets:**
 ```bash
-~/projects/snippets/.scripts/search.py --tag dbt --format json
-~/projects/snippets/.scripts/search.py --language sql --format json
+~/projects/personal/snippets/.scripts/search.py --tag dbt --format json
+~/projects/personal/snippets/.scripts/search.py --language sql --format json
 ```
 
 ### When to Use Snippets Repository
