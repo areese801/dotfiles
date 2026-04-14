@@ -6,3 +6,9 @@ command = /bin/zsh --login
 # Remember window position and size across launches
 # Position window manually once, then Ghostty remembers it
 window-save-state = always
+
+# Disable auto secure input so espanso can intercept keystrokes
+macos-auto-secure-input = false
+
+# Toggle secure input manually when entering passwords
+keybind = ctrl+shift+s=toggle_secure_input
