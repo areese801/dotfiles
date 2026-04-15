@@ -25,6 +25,12 @@ matches:
   - trigger: "~!e"
     replace: "areese801@gmail.com"
 
+  - trigger: "~!li"
+    replace: "https://www.linkedin.com/in/areese801/"
+
+  - trigger: "~!gh"
+    replace: "https://github.com/areese801"
+
   # ============================================================================
   # Claude / LLM Prompting
   # ============================================================================
