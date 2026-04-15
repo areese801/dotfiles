@@ -14,6 +14,14 @@
 common/.config/zsh/private.zsh
 private.zsh
 
+# Credentials (any path containing "credential", case-insensitive)
+*[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]*
+*[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]*/
+
+# Secrets (any path containing "secret", case-insensitive)
+*[sS][eE][cC][rR][eE][tT]*
+*[sS][eE][cC][rR][eE][tT]*/
+
 # Environment files
 .env
 .env.*
