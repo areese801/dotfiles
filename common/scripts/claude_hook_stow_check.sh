@@ -50,7 +50,7 @@ _relative="${_file_path#${DOTFILES_DIR}/}"
 _package="${_relative%%/*}"
 
 # Skip non-stow directories (submodules, docs, etc.)
-readonly STOW_PACKAGES="common macos fedora"
+readonly STOW_PACKAGES="common macos"
 _is_stow_package=false
 for _pkg in ${STOW_PACKAGES}; do
     if [ "${_package}" = "${_pkg}" ]; then
