@@ -48,7 +48,7 @@ matches:
       - name: clip
         type: shell
         params:
-          cmd: "pbpaste | tr '[:upper:]' '[:lower:]'"
+          cmd: "{ pbpaste 2>/dev/null || wl-paste 2>/dev/null || xclip -selection clipboard -o 2>/dev/null; } | tr '[:upper:]' '[:lower:]'"
 
   - trigger: "~!mbasgb"
     replace: "megabytes as gigabytes"
@@ -79,7 +79,7 @@ matches:
       - name: clip
         type: shell
         params:
-          cmd: "pbpaste | tr '[:upper:]' '[:lower:]'"
+          cmd: "{ pbpaste 2>/dev/null || wl-paste 2>/dev/null || xclip -selection clipboard -o 2>/dev/null; } | tr '[:upper:]' '[:lower:]'"
 
   # ============================================================================
   # Jira

@@ -186,6 +186,9 @@ After merging, suggest `clean` to tidy up stale branches. Don't run automaticall
 - `clean -r` — also delete merged remote branches (GitHub only)
 - `clean -n` — dry run
 
+### Todoist Task Cleanup
+After completing work, ask the user if there are related Todoist tasks that should be closed out. If the user confirms or provides a task reference, search Todoist and mark the relevant tasks as complete.
+
 ---
 
 ## Shell Script Conventions
