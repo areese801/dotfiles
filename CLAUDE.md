@@ -20,11 +20,8 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 │   ├── .zshrc
 │   └── scripts/      # Custom scripts (symlinked to ~/scripts)
 │
-├── macos/            # macOS-specific (future, if needed)
-│   └── .config/
-│
-└── fedora/           # Fedora-specific (future)
-    └── .config/      # e.g., hyprland, waybar, dnf configs
+└── macos/            # macOS-specific (future, if needed)
+    └── .config/
 ```
 
 ### What Goes Where
@@ -32,10 +29,10 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 | Config Type | Location | Examples |
 |-------------|----------|----------|
 | Cross-platform tools | `common/` | nvim, tmux, zsh, ghostty, yazi |
-| Window managers | `<os>/` | hyprland, sway, yabai |
-| DE-specific | `<os>/` | waybar, polybar, sketchybar |
-| Package manager configs | `<os>/` | dnf, brew (if customized) |
-| OS-specific scripts | `<os>/scripts/` | systemd services, launchd agents |
+| Window managers | `macos/` | yabai, sway (if needed) |
+| DE-specific | `macos/` | sketchybar (if needed) |
+| Package manager configs | `macos/` | brew (if customized) |
+| OS-specific scripts | `macos/scripts/` | launchd agents |
 
 ### Current Packages
 
@@ -272,40 +269,6 @@ stow common
 # stow macos  # when/if macos-specific configs exist
 ```
 
-**Fedora (future):**
-```bash
-cd ~/.dotfiles
-stow common
-stow fedora
-```
-
-### Adding a New OS Package (e.g., Fedora)
-
-1. **Create the package directory structure:**
-   ```bash
-   mkdir -p fedora/.config
-   ```
-
-2. **Copy OS-specific configs:**
-   ```bash
-   # Example: Hyprland window manager
-   cp -r ~/.config/hypr fedora/.config/
-
-   # Example: Waybar status bar
-   cp -r ~/.config/waybar fedora/.config/
-   ```
-
-3. **Stow with adopt to convert existing files:**
-   ```bash
-   stow --adopt fedora
-   ```
-
-4. **Commit the new package:**
-   ```bash
-   git add fedora/
-   git commit -m "Add Fedora-specific configs (hyprland, waybar)"
-   ```
-
 ### Adding Cross-Platform Configs
 
 **For configs that work on all machines (add to `common/`):**
@@ -327,7 +290,6 @@ stow fedora
 | Command | Description |
 |---------|-------------|
 | `stow common` | Create symlinks for common configs |
-| `stow fedora` | Create symlinks for Fedora configs |
 | `stow --adopt common` | Adopt existing files and create symlinks |
 | `stow -D common` | Remove symlinks for a package |
 | `stow -R common` | Restow (remove and recreate symlinks) |
