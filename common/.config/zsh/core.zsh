@@ -497,7 +497,7 @@ devkill() {
 
 alias tt='tmux ls'
 alias todo="rg -i \"(#|--)\s*todo\" --type py --type sql --type md --glob '!venv/**' -n --no-heading \"\$(pwd)\""
-alias tree='tree -I "venv|.env|virtualenv" --matchdirs'
+alias tree='tree -I "venv|.venv|virtualenv|node_modules|vendor|bower_components|.bundle|Pods|target|build|dist|__pycache__|.egg-info" --matchdirs'
 alias uuid='uuidgen | tr "[:upper:]" "[:lower:]"'
 alias guid='uuid'
 alias randompw='_uuid=$(uuidgen) && _hash=$(echo -n "$_uuid" | shasum -a 256 | cut -d" " -f1) && _chars="!@#$%^&*" && _suffix="" && for i in 1 2 3; do _suffix="${_suffix}${_chars:$((RANDOM % ${#_chars})):1}"; done && echo "${_hash}${_suffix}"'
