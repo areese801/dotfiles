@@ -38,6 +38,9 @@ matches:
   - trigger: "~!ask"
     replace: "Ask clarifying questions as needed."
 
+  - trigger: "~!context"
+    replace: "Is this a good point to clear or compact your context?  If so, which would you recommend we do?  Before doing so, is there anything in your context, memories, etc that you feel we should write down (in CLAUDE.md, README.md or any other place)?"
+
   # ============================================================================
   # SQL
   # ============================================================================
