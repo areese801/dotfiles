@@ -165,3 +165,11 @@ matches:
         type: shell
         params:
           cmd: "$HOME/projects/personal/snippets/get c2fca6c4-e4fb-45f4-aa18-fec6c26c9af9 --print"
+
+  - trigger: "~!targets"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 010888b4-62c3-4c5a-99ee-aa94096276d8 --print"
