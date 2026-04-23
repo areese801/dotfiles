@@ -157,3 +157,11 @@ matches:
         type: shell
         params:
           cmd: "$HOME/projects/personal/snippets/get 6faa1a98-8c6c-4bda-9a4f-6ec66fc28f4a --print"
+
+  - trigger: "~!integration"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get c2fca6c4-e4fb-45f4-aa18-fec6c26c9af9 --print"
