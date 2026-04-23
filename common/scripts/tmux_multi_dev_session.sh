@@ -221,7 +221,8 @@ _rebalance_layout() {
     # Join remaining columns' top panes as horizontal splits.
     for (( _i=2; _i<=_col_count; _i++ )); do
         local _top_idx=$(( (_i - 1) * 3 ))
-        tmux join-pane -h -t "${_all_panes[0]}" -s "${_all_panes[$_top_idx]}" -l 50%
+        local _prev_top_idx=$(( (_i - 2) * 3 ))
+        tmux join-pane -h -t "${_all_panes[$_prev_top_idx]}" -s "${_all_panes[$_top_idx]}" -l 50%
     done
 
     # Even out the columns
