@@ -149,3 +149,11 @@ matches:
         type: shell
         params:
           cmd: "$HOME/projects/personal/snippets/get 42536120-8043-4112-b7fa-2cdffa47d0c2 --print"
+
+  - trigger: "~!transactions"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 6faa1a98-8c6c-4bda-9a4f-6ec66fc28f4a --print"
