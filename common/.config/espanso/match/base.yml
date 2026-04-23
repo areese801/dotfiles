@@ -134,3 +134,140 @@ matches:
   # Pipe SnowSQL output to clean TSV
   - trigger: "~!sedtsv"
     replace: " | grep -v -E '^$' | grep -E '\\s*[\\|\\+]' | grep -v -E '^(\\+|\\|)[+-]+(\\+|\\|)$' | grep -v -E '^[+ -]+$' | sed 's/^[[:space:]]*|[[:space:]]//g' | sed 's/[[:space:]]*|[[:space:]]*$//g' | sed 's/[[:space:]]*|[[:space:]]*/\\t/g'"
+
+  # ============================================================================
+  # Private Snippets (fetched from private snippets repo at expansion time)
+  # ============================================================================
+  # Pattern: trigger expands by shelling out to the private snippets repo and
+  # printing the snippet body. Only the UUID lives in this public config — the
+  # snippet content stays in the private repo at ~/projects/personal/snippets.
+
+  - trigger: "~!cust"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 42536120-8043-4112-b7fa-2cdffa47d0c2 --print"
+
+  - trigger: "~!transactions"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 6faa1a98-8c6c-4bda-9a4f-6ec66fc28f4a --print"
+
+  - trigger: "~!integration"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get c2fca6c4-e4fb-45f4-aa18-fec6c26c9af9 --print"
+
+  - trigger: "~!targets"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 010888b4-62c3-4c5a-99ee-aa94096276d8 --print"
+
+  - trigger: "~!company"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 695e329e-0d09-4124-9b41-18853fa1108d --print"
+
+  - trigger: "~!loc"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get e1905d62-4585-42e5-bf82-1110ef73f60b --print"
+
+  - trigger: "~!cred"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 3774f403-9331-47a0-8bd5-6d0d590bddbc --print"
+
+  - trigger: "~!columns"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get c3242223-db65-4a0e-927a-374a2ad1f3ba --print"
+
+  # --- QA queries (confirm records landed during ETL loads) ---
+
+  - trigger: "~!qaloc"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get a827dd84-5c33-44f3-ba3f-735603eed3f5 --print"
+
+  - trigger: "~!qacust"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 021c7c64-910b-49ae-9ce9-f158e2f9dea3 --print"
+
+  - trigger: "~!qasub"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 849fef74-4ba0-4a29-ade5-8b5b122bb191 --print"
+
+  - trigger: "~!qatrans"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get a1b02590-7f01-4e0c-8658-e57ca37ba594 --print"
+
+  - trigger: "~!qavehicle"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 28c5a637-1590-428e-85cd-6037ae93d85d --print"
+
+  - trigger: "~!qarealestate"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 21b54727-6eee-4fa6-9d1e-78923665306e --print"
+
+  - trigger: "~!qasched"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get c0b36087-10be-4d58-8dba-311a25a21605 --print"
+
+  - trigger: "~!qalog"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 91a4413c-6eb1-4f1d-984b-7f998b8849ff --print"
