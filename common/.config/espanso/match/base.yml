@@ -182,6 +182,14 @@ matches:
         params:
           cmd: "$HOME/projects/personal/snippets/get 695e329e-0d09-4124-9b41-18853fa1108d --print"
 
+  - trigger: "~!loc"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get e1905d62-4585-42e5-bf82-1110ef73f60b --print"
+
   - trigger: "~!cred"
     replace: "{{snippet}}"
     vars:
