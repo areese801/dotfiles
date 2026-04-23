@@ -134,3 +134,18 @@ matches:
   # Pipe SnowSQL output to clean TSV
   - trigger: "~!sedtsv"
     replace: " | grep -v -E '^$' | grep -E '\\s*[\\|\\+]' | grep -v -E '^(\\+|\\|)[+-]+(\\+|\\|)$' | grep -v -E '^[+ -]+$' | sed 's/^[[:space:]]*|[[:space:]]//g' | sed 's/[[:space:]]*|[[:space:]]*$//g' | sed 's/[[:space:]]*|[[:space:]]*/\\t/g'"
+
+  # ============================================================================
+  # Private Snippets (fetched from private snippets repo at expansion time)
+  # ============================================================================
+  # Pattern: trigger expands by shelling out to the private snippets repo and
+  # printing the snippet body. Only the UUID lives in this public config — the
+  # snippet content stays in the private repo at ~/projects/personal/snippets.
+
+  - trigger: "~!cust"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 42536120-8043-4112-b7fa-2cdffa47d0c2 --print"
