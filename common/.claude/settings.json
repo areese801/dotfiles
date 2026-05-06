@@ -29,10 +29,42 @@
       "Bash(git log *)",
       "Bash(git diff *)",
       "Bash(git branch *)",
-      "Bash(git show *)"
-    ],
-    "additionalDirectories": [
-      "/Users/areese/.dotfiles"
+      "Bash(git show *)",
+      "Bash(kb version)",
+      "Bash(kb --version)",
+      "Bash(kb audit *)",
+      "Bash(kb workspace list*)",
+      "Bash(kb workspace show *)",
+      "Bash(kb workspace current*)",
+      "Bash(kb story list*)",
+      "Bash(kb story show *)",
+      "Bash(kb epic list*)",
+      "Bash(kb epic show *)",
+      "Bash(kb tag list*)",
+      "Bash(kb token list*)",
+      "Bash(kb story create *)",
+      "Bash(kb story move *)",
+      "Bash(kb story edit *)",
+      "Bash(kb story comment *)",
+      "Bash(kb story link *)",
+      "Bash(kb workspace create *)",
+      "Bash(kb workspace use *)",
+      "Bash(kb epic create *)",
+      "Bash(kb epic close *)",
+      "Bash(kb epic reopen *)",
+      "Bash(kb tag create *)",
+      "Bash(kb tag rename *)",
+      "Bash(kb backup*)",
+      "Bash(kb export *)",
+      "Bash(kb project init*)",
+      "Bash(kb token revoke *)",
+      "Bash(tc list*)",
+      "Bash(tc exists *)",
+      "Bash(tc outbox *)",
+      "Bash(tc diff *)",
+      "Bash(tc logs *)",
+      "Bash(tc diagnose *)",
+      "Bash(tc patch *)"
     ]
   },
   "hooks": {
@@ -96,8 +128,5 @@
         "repo": "areese801/trusty-cage-plugin"
       }
     }
-  },
-  "feedbackSurveyState": {
-    "lastShownTime": 1754086142848
   }
 }
