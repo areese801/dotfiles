@@ -5,6 +5,7 @@
 	],
 	"installed_packages":
 	[
-		"Merge Windows"
+		"Merge Windows",
+		"Package Control",
 	],
 }
