@@ -212,6 +212,14 @@ matches:
         params:
           cmd: "$HOME/projects/personal/snippets/get c3242223-db65-4a0e-927a-374a2ad1f3ba --print"
 
+  - trigger: "~!address"
+    replace: "{{snippet}}"
+    vars:
+      - name: snippet
+        type: shell
+        params:
+          cmd: "$HOME/projects/personal/snippets/get 5e3fcb00-0c51-4dfa-bc78-762d13267945 --print"
+
   # --- QA queries (confirm records landed during ETL loads) ---
 
   - trigger: "~!qaloc"
