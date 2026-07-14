@@ -11,3 +11,6 @@ export PATH="$PATH:/Users/areese/Library/Application Support/JetBrains/Toolbox/s
 
 # Created by `pipx` on 2026-04-09 20:46:41
 export PATH="$PATH:/Users/areese/.local/bin"
+
+# Added by Obsidian
+export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"

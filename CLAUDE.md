@@ -20,8 +20,8 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 │   ├── .zshrc
 │   └── scripts/      # Custom scripts (symlinked to ~/scripts)
 │
-└── macos/            # macOS-specific (future, if needed)
-    └── .config/
+└── macos/            # macOS-specific configs
+    └── Library/Application Support/Sublime Text/Packages/User/
 ```
 
 ### What Goes Where
@@ -29,6 +29,7 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 | Config Type | Location | Examples |
 |-------------|----------|----------|
 | Cross-platform tools | `common/` | nvim, tmux, zsh, ghostty, yazi |
+| macOS-only paths (`~/Library/...`) | `macos/` | Sublime Text |
 | Window managers | `macos/` | yabai, sway (if needed) |
 | DE-specific | `macos/` | sketchybar (if needed) |
 | Package manager configs | `macos/` | brew (if customized) |
@@ -37,6 +38,7 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 ### Current Packages
 
 - `common/` - Shared configs for all machines (nvim, ghostty, yazi, tmux, zsh, scripts, Claude Code)
+- `macos/` - macOS-only configs (Sublime Text user settings + keymap)
 - `agent_skills/` - Git submodule containing SKILL.md-based agent skills (forked from castlenthesky/agent_skills)
 
 ## Architecture
@@ -266,7 +268,7 @@ This repository uses GNU Stow for symlink management with a package-based struct
 ```bash
 cd ~/.dotfiles
 stow common
-# stow macos  # when/if macos-specific configs exist
+stow macos
 ```
 
 ### Adding Cross-Platform Configs

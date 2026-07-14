@@ -129,6 +129,12 @@ Fixed stale snippets path, settings file references, and git workflow guidance.
 - Follow language-specific standards (PEP 257, JSDoc, etc.)
 - Document public APIs, params, returns, exceptions, side effects
 
+### Spelling and Word Choice
+- **Bias toward American English** in code, docstrings, comments, prose docs, and commit messages. Examples: `color` (not colour), `behavior` (not behaviour), `recognize` (not recognise), `optimize` (not optimise), `flavored` (not flavoured), `modeled` (not modelled), `honors` (not honours).
+- **Do NOT change** quoted text from external sources (user messages, third-party docs, library API names) just to enforce dialect.
+- **Stdlib API names take precedence over dialect**: `asyncio.CancelledError`, `Future.cancelled()`, etc. use British spellings because the Python stdlib does. Don't break code or create jarring mixes by Americanizing prose right next to those names — match the surrounding API.
+- When in doubt, follow the existing spelling pattern in the file you're editing rather than introducing inconsistency.
+
 ---
 
 ## User Environment
