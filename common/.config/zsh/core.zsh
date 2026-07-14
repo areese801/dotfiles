@@ -262,7 +262,17 @@ alias cc='claude --continue || claude'
 alias ccd='claude --continue --enable-auto-mode || claude --enable-auto-mode'
 alias ccvd='claude --continue --dangerously-skip-permissions || claude --enable-auto-mode --dangerously-skip-permissions'
 alias cl='claude login'
-alias cloc='cloc --exclude-dir=venv,.venv,virtualenv,node_modules,vendor,bower_components,.bundle,Pods,target,build,dist,__pycache__,.egg-info'
+# cloc - count only what you wrote, not what tooling generated.
+# Inside a git repo, --vcs=git respects .gitignore (skips node_modules, .next,
+# dist, build, coverage, lockfiles, etc). Outside a repo, fall back to an
+# explicit exclude list covering common generated/dependency dirs.
+function cloc() {
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        command cloc --vcs=git "$@"
+    else
+        command cloc --exclude-dir=venv,.venv,virtualenv,node_modules,vendor,bower_components,.bundle,Pods,target,build,dist,out,__pycache__,.egg-info,.next,.nuxt,.output,.svelte-kit,.turbo,.cache,.parcel-cache,coverage,.mypy_cache,.pytest_cache,.ruff_cache --not-match-f="(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|.*\.min\.js|.*\.tsbuildinfo)" "$@"
+    fi
+}
 function clean() {
     local _remote=false
     local _dry_run=false
@@ -423,7 +433,6 @@ alias snippets='cd ~/projects/personal/snippets && ./snippets'
 alias snip='cd ~/projects/personal/snippets && ./snippets'
 alias scripts='cd ~/scripts && ls -lahG'
 alias src='source ~/.zprofile && source ~/.zshrc'
-alias t='cd ~/projects/cinch/tap_repositories && ls -lahG'
 alias tcomp='bcomp -fv="Table Compare"'
 alias tm='tmux'
 alias tml='tmux ls'
