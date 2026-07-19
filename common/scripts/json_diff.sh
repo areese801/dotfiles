@@ -39,18 +39,19 @@ else
     jq -S . "$FILE2" > "$TEMP2"
 fi
 
-# Compare the formatted files using Beyond Compare
+# Compare the formatted files. Prefer Beyond Compare, then the macOS app bundle,
+# then an nvim diff, and finally plain diff as a last resort.
 if command -v bcompare &> /dev/null; then
     bcompare "$TEMP1" "$TEMP2"
+elif [ -f "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" ]; then
+    # Common macOS install location if bcompare isn't in PATH
+    "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" "$TEMP1" "$TEMP2"
+elif command -v nvim &> /dev/null; then
+    echo "Beyond Compare not found; opening an nvim diff instead." >&2
+    nvim -d "$TEMP1" "$TEMP2"
 else
-    # Try the common macOS install location if bcompare isn't in PATH
-    if [ -f "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" ]; then
-        "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" "$TEMP1" "$TEMP2"
-    else
-        echo "Error: Beyond Compare not found. Install it or add it to your PATH."
-        echo "Using standard diff instead:"
-        diff -u "$TEMP1" "$TEMP2"
-    fi
+    echo "Beyond Compare and nvim not found. Using standard diff instead:" >&2
+    diff -u "$TEMP1" "$TEMP2"
 fi
 
 # Note: We don't immediately clean up the temp files because Beyond Compare needs them

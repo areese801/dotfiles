@@ -13,6 +13,8 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 ```
 ~/.dotfiles/
 ├── agent_skills/     # Git submodule → areese801/agent_skills (SKILL.md-based skills)
+├── bootstrap/        # New-machine setup (NOT stowed)
+│   └── bootstrap.sh  # Installs packages, oh-my-zsh, stows, sets login shell
 ├── common/           # Shared across ALL machines (always stow this)
 │   ├── .claude/      # Claude Code config (skills symlink, settings, global CLAUDE.md)
 │   ├── .config/      # XDG configs (nvim, ghostty, yazi, zsh)
@@ -23,6 +25,9 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 └── macos/            # macOS-specific configs
     └── Library/Application Support/Sublime Text/Packages/User/
 ```
+
+**Linux support** lives inside `common/` (via `linux.zsh` and OS-guarded config), not a
+separate stow package. Only add a `linux/` package if a Linux-only *config file* appears.
 
 ### What Goes Where
 
@@ -264,12 +269,26 @@ This repository uses GNU Stow for symlink management with a package-based struct
 
 ### Machine Setup
 
-**macOS (current):**
+**Fastest (any supported OS):** `bootstrap/bootstrap.sh` — idempotent; installs
+packages, initializes submodules, installs oh-my-zsh, stows, and sets the login shell
+to zsh. Detects Fedora (`dnf`) vs macOS (Homebrew). Flags: `--dry-run`, `--skip-packages`,
+`--no-chsh`, `--help`. The script is NOT stowed (lives outside `common/`/`macos/`).
+
+**macOS:**
 ```bash
 cd ~/.dotfiles
 stow common
 stow macos
 ```
+
+**Fedora:**
+```bash
+cd ~/.dotfiles
+stow common          # Linux behavior comes from linux.zsh, no extra package
+```
+
+Fedora packages: nearly everything is in the default repos; `lazygit`, `yazi`, and
+`ghostty` come from COPRs (`atim/lazygit`, `lihaohong/yazi`, `scottames/ghostty`).
 
 ### Adding Cross-Platform Configs
 

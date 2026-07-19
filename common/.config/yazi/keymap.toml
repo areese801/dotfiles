@@ -34,5 +34,5 @@ desc = "Show git status"
 # File operations
 [[mgr.prepend_keymap]]
 on = [ "c", "p" ]
-run = '''shell 'echo "$1" | pbcopy' --confirm'''
+run = '''shell 'echo "$1" | clip' --confirm'''
 desc = "Copy file path to clipboard"

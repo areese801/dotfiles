@@ -178,6 +178,20 @@ set -e # Stop this program on any failure
 ###
 ### Launch a folder compare session in Beyond Compare
 ###
+	# Beyond Compare's CLI is `bcompare` on Linux and `bcomp` on macOS.
+	_bc_cli=""
+	if command -v bcompare >/dev/null 2>&1; then
+		_bc_cli="bcompare"
+	elif command -v bcomp >/dev/null 2>&1; then
+		_bc_cli="bcomp"
+	fi
 
-	docmd "bcomp -fv='Folder Compare' ${tmpWorkingDirBranchA} ${tmpWorkingDirBranchB} &"  #See:  https://www.scootersoftware.com/v4help/index.html?command_line_reference.html
+	if [ -n "${_bc_cli}" ]; then
+		docmd "${_bc_cli} -fv='Folder Compare' ${tmpWorkingDirBranchA} ${tmpWorkingDirBranchB} &"  #See:  https://www.scootersoftware.com/v4help/index.html?command_line_reference.html
+	else
+		echo "Beyond Compare not found (need 'bcompare' on Linux or 'bcomp' on macOS)."
+		echo "Compare these directories manually:"
+		echo "  Branch A: ${tmpWorkingDirBranchA}"
+		echo "  Branch B: ${tmpWorkingDirBranchB}"
+	fi
 

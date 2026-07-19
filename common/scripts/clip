@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# clip - Copy stdin to the system clipboard, cross-platform.
+#
+# Usage:  echo "text" | clip
+#         cat file | clip
+#
+# Backends (first found wins):
+#   macOS   → pbcopy
+#   Wayland → wl-copy
+#   X11     → xclip / xsel
+#
+# Complements the interactive `clip` shell alias so scripts and non-interactive
+# callers (e.g. yazi keybindings, build systems) get the same behavior without
+# depending on shell aliases.
+
+set -euo pipefail
+
+if command -v pbcopy >/dev/null 2>&1; then
+  exec pbcopy
+elif command -v wl-copy >/dev/null 2>&1; then
+  exec wl-copy
+elif command -v xclip >/dev/null 2>&1; then
+  exec xclip -selection clipboard
+elif command -v xsel >/dev/null 2>&1; then
+  exec xsel --clipboard --input
+fi
+
+echo "clip: no clipboard tool found (need pbcopy, wl-copy, xclip, or xsel)" >&2
+exit 1
