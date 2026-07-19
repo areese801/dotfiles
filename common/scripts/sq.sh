@@ -84,9 +84,16 @@ currDir=$(pwd)
 # ${outputFormatArg}
 
 # 2023-07-21 - I can't get the sublime text build system to use snowsql without the complete path
-# snowSQLtoUse=$(which snowsql)
-snowSQLtoUse=/Applications/SnowSQL.app/Contents/MacOS/snowsql
-# snowSQLtoUse=snowsql
+# Prefer snowsql on PATH (Linux, normal shells); fall back to the macOS app bundle
+# for environments where PATH isn't populated (e.g. the Sublime Text build system).
+if command -v snowsql >/dev/null 2>&1; then
+    snowSQLtoUse=$(command -v snowsql)
+elif [[ -x /Applications/SnowSQL.app/Contents/MacOS/snowsql ]]; then
+    snowSQLtoUse=/Applications/SnowSQL.app/Contents/MacOS/snowsql
+else
+    echo "Error: snowsql not found (not on PATH, and no macOS app bundle at /Applications/SnowSQL.app)." >&2
+    exit 1
+fi
 
 # 2022-06-10 - Added this block today.  The idea is that is we didn't specify an output format, results are printed to stdout.  If we did specify a format they're suppressed but will wind up in a temp file and on the clipboard
 # TODO:  Should parameterize this script to support multiple connection profiles
@@ -124,8 +131,8 @@ cd $currDir
 recCount=$(cat ${resultFile} | wc -l)
 echo "${recCount} LINES were sent to the output file at ${resultFile}.  Depending on output format this may not match the record count completely"
 
-# Put results on clipboard
-cat ${resultFile} | pbcopy
+# Put results on clipboard (cross-platform via ~/scripts/clip)
+cat ${resultFile} | clip
 echo "These results have been copied to the clipboard (Hint: tsv pastes nicely into spreadsheets)"
 
 

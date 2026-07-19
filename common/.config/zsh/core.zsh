@@ -127,18 +127,24 @@ export VISUAL='nvim'
 
 # Source fzf shell integration (key bindings + completion)
 # Provides: Ctrl+T (file search), Ctrl+R (history), Alt+C (cd to directory)
-if [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
-  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
-  source /opt/homebrew/opt/fzf/shell/completion.zsh
-elif [[ -f /usr/local/opt/fzf/shell/key-bindings.zsh ]]; then
-  # Intel Mac fallback
-  source /usr/local/opt/fzf/shell/key-bindings.zsh
-  source /usr/local/opt/fzf/shell/completion.zsh
-elif [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
-  # Linux (Arch/Fedora)
-  source /usr/share/fzf/key-bindings.zsh
-  source /usr/share/fzf/completion.zsh
-fi
+# Install path varies by platform:
+#   Homebrew (Apple Silicon): /opt/homebrew/opt/fzf/shell
+#   Homebrew (Intel):         /usr/local/opt/fzf/shell
+#   Fedora:                   /usr/share/fzf/shell
+#   Arch:                     /usr/share/fzf
+# Source whichever exists; completion.zsh is optional (Fedora ships only key-bindings).
+for _fzf_dir in \
+  /opt/homebrew/opt/fzf/shell \
+  /usr/local/opt/fzf/shell \
+  /usr/share/fzf/shell \
+  /usr/share/fzf; do
+  if [[ -f "${_fzf_dir}/key-bindings.zsh" ]]; then
+    source "${_fzf_dir}/key-bindings.zsh"
+    [[ -f "${_fzf_dir}/completion.zsh" ]] && source "${_fzf_dir}/completion.zsh"
+    break
+  fi
+done
+unset _fzf_dir
 
 # Use fd for faster file finding (respects .gitignore)
 if command -v fd &>/dev/null; then
@@ -161,7 +167,7 @@ export FZF_DEFAULT_OPTS="
 # Ctrl+T options (file search with preview)
 export FZF_CTRL_T_OPTS="
   --preview '([[ -f {} ]] && (bat --style=numbers --color=always {} 2>/dev/null || cat {})) || ([[ -d {} ]] && tree -C {} | head -50) || echo {}'
-  --bind 'ctrl-y:execute-silent(echo -n {} | pbcopy)+abort'
+  --bind 'ctrl-y:execute-silent(echo -n {} | clip)+abort'
 "
 
 # Ctrl+R options (history search)

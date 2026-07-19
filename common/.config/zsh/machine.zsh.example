@@ -43,13 +43,13 @@
 # alias vpn="open -a 'Cisco AnyConnect'"
 
 ###
-## Omarchy/Linux Example
+## Linux Example
 ###
 # export _MACHINE_TYPE="linux-desktop"
 #
 # # Additional Linux-specific paths
 # PATH="$PATH:$HOME/.local/share/flatpak/exports/bin"
 #
-# # Hyprland-specific aliases
-# alias monitors="hyprctl monitors"
+# # GNOME-specific aliases
+# alias displays="gnome-control-center display"
 # alias reload-hypr="hyprctl reload"

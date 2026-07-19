@@ -1,6 +1,8 @@
 # Dotfiles
 
-Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/), organized for multi-machine use across macOS and Linux (Omarchy).
+Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/), organized for multi-machine use across macOS and Linux (Fedora).
+
+> **New machine? One command:** `bootstrap/bootstrap.sh` installs packages, sets up Oh My Zsh, stows the configs, and switches your shell to zsh. See [Bootstrapping a New Machine](#bootstrapping-a-new-machine).
 
 ## What is Stow?
 
@@ -14,7 +16,9 @@ This repository uses a modular structure to support multiple machines:
 ~/.dotfiles/
 ├── agent_skills/                # Git submodule → areese801/agent_skills
 │   └── .agent/skills/          # SKILL.md-based agent skills
-├── common/                      # Shared across all machines
+├── bootstrap/                   # New-machine setup (not stowed)
+│   └── bootstrap.sh            # Installs packages, oh-my-zsh, stows, sets shell
+├── common/                      # Shared across all machines (always stow this)
 │   ├── .claude/
 │   │   ├── skills → ../../agent_skills/.agent/skills  # Symlink into submodule
 │   │   ├── CLAUDE.md
@@ -26,61 +30,80 @@ This repository uses a modular structure to support multiple machines:
 │   │   └── zsh/                # Modular zsh configuration
 │   │       ├── core.zsh        # Shared config (oh-my-zsh, aliases, functions)
 │   │       ├── macos.zsh       # macOS-specific config
-│   │       ├── linux.zsh       # Linux-specific config
+│   │       ├── linux.zsh       # Linux-specific config (Fedora/GNOME, etc.)
 │   │       ├── private.zsh     # Sensitive/work-specific (gitignored)
 │   │       └── machine.zsh.example  # Template for machine-specific config
 │   ├── .tmux.conf
-│   └── zshrc                   # Bootstrap loader
-├── linux-omarchy/               # Linux with Omarchy desktop
-│   └── .config/
-│       ├── hypr/               # Hyprland window manager
-│       ├── waybar/             # Status bar
-│       └── walker/             # Application launcher
+│   ├── .zprofile
+│   └── .zshrc                  # Bootstrap loader
+├── macos/                       # macOS-only configs (stow on macOS)
+│   └── Library/Application Support/Sublime Text/  # Sublime user settings + keymap
 ├── CLAUDE.md
 └── README.md
 ```
 
+Linux support lives in `common/` (via `linux.zsh` and OS-guarded config) — there is no
+separate Linux stow package. Add a `linux/` package (parallel to `macos/`) only if a
+Linux-only config file ever needs one.
+
 ## Setup
 
-### Initial Installation
+### Quickest path (recommended)
 
-1. **Install Stow**
-   ```bash
-   brew install stow  # macOS
-   sudo pacman -S stow  # Arch Linux
-   sudo apt install stow  # Ubuntu/Debian
-   ```
+```bash
+git clone --recurse-submodules git@github.com:areese801/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+bootstrap/bootstrap.sh
+```
 
-2. **Clone this repository** (with submodules)
-   ```bash
-   git clone --recurse-submodules <your-repo-url> ~/.dotfiles
-   cd ~/.dotfiles
-   ```
-   If you already cloned without `--recurse-submodules`:
-   ```bash
-   git submodule update --init --recursive
-   ```
+`bootstrap.sh` is idempotent and safe to re-run. It detects the platform
+(Fedora via `dnf`, macOS via Homebrew), installs the required tools, initializes
+submodules, installs Oh My Zsh, stows `common` (plus `macos` on a Mac), and
+switches your login shell to zsh. Useful flags:
 
-3. **Create symlinks based on your machine**
+| Flag | Effect |
+|------|--------|
+| `-n`, `--dry-run` | Print what would happen without making changes |
+| `--skip-packages` | Skip OS package installation (submodule/stow/omz only) |
+| `--no-chsh` | Leave the default login shell unchanged |
+| `-h`, `--help` | Show help |
 
-   **On macOS:**
-   ```bash
-   stow common
-   ```
+### Manual symlinking
 
-   **On Linux (Omarchy):**
-   ```bash
-   stow common
-   stow linux-omarchy
-   ```
+If you'd rather stow by hand after installing the prerequisites:
+
+```bash
+stow common            # always — shared configs
+stow macos             # macOS only — Sublime Text user settings
+```
 
 ## Bootstrapping a New Machine
 
 This section provides a complete guide to setting up a fresh machine (e.g., a new work computer) with these dotfiles.
 
+**The fast way:** clone with submodules and run `bootstrap/bootstrap.sh` (see [Setup](#setup)).
+The steps below document what the script automates, for reference or manual setup.
+
 ### Prerequisites
 
-Before stowing, ensure you have these dependencies installed:
+The bootstrap script installs these for you. To do it by hand:
+
+**Fedora (dnf):**
+```bash
+# Base tools (all in the default repos)
+sudo dnf install -y zsh util-linux-user git-core neovim tmux stow gh \
+  ripgrep fd-find bat eza fzf zoxide git-delta cloc tree jq wl-clipboard xclip
+
+# lazygit + yazi need COPRs
+sudo dnf copr enable -y atim/lazygit && sudo dnf install -y lazygit
+sudo dnf copr enable -y lihaohong/yazi && sudo dnf install -y yazi
+
+# ghostty (Fedora COPR)
+sudo dnf copr enable -y scottames/ghostty && sudo dnf install -y ghostty
+
+# Oh My Zsh (required by the zsh configuration)
+RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+```
 
 **macOS:**
 ```bash
@@ -92,18 +115,10 @@ echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install essential tools
-brew install stow git neovim tmux yazi ripgrep fd fzf
+brew install stow git neovim tmux yazi ripgrep fd fzf bat eza gh lazygit git-delta cloc
 brew install --cask ghostty
 
 # Install Oh-My-Zsh (required by the zsh configuration)
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-```
-
-**Linux (Arch/Omarchy):**
-```bash
-sudo pacman -S stow git neovim tmux yazi ripgrep fd fzf
-
-# Install Oh-My-Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
@@ -126,15 +141,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
    # etc.
    ```
 
-3. **Stow the common package**
+3. **Stow the packages**
    ```bash
-   stow common
+   stow common          # always
+   stow macos           # macOS only (Sublime Text user settings)
    ```
-
-4. **On Linux/Omarchy, also stow linux-omarchy**
-   ```bash
-   stow linux-omarchy
-   ```
+   On Linux, `common` is all you need — Linux-specific behavior lives in
+   `common/.config/zsh/linux.zsh`, sourced automatically.
 
 5. **Create machine-specific configuration (optional)**
    ```bash
@@ -256,14 +269,15 @@ chmod 600 /.credentials/*
 
 1. **Install Stow**
    ```bash
-   brew install stow  # macOS
-   sudo pacman -S stow  # Arch Linux
+   sudo dnf install stow  # Fedora
+   brew install stow      # macOS
+   sudo pacman -S stow    # Arch Linux
    sudo apt install stow  # Ubuntu/Debian
    ```
 
 2. **Create dotfiles directory**
    ```bash
-   mkdir -p ~/.dotfiles/{common/.config,linux-omarchy/.config}
+   mkdir -p ~/.dotfiles/{common/.config,macos}
    cd ~/.dotfiles
    ```
 
@@ -279,7 +293,7 @@ chmod 600 /.credentials/*
 4. **Create symlinks with stow**
    ```bash
    stow common              # Always stow common
-   stow linux-omarchy       # Only on Linux/Omarchy machines
+   stow macos               # Only on macOS
    ```
 
 5. **Initialize git repository**
@@ -291,11 +305,11 @@ chmod 600 /.credentials/*
 
 ## How Stow Works
 
-Stow creates symlinks from your home directory to files in each stow package. Each top-level directory (`common/`, `linux-omarchy/`) is a separate stow package:
+Stow creates symlinks from your home directory to files in each stow package. Each top-level directory (`common/`, `macos/`) is a separate stow package:
 
 - `common/.config/nvim/` → `~/.config/nvim/`
-- `common/zshrc` → `~/zshrc`
-- `linux-omarchy/.config/hypr/` → `~/.config/hypr/`
+- `common/.zshrc` → `~/.zshrc`
+- `macos/Library/Application Support/Sublime Text/` → `~/Library/Application Support/Sublime Text/`
 
 The directory structure inside each package mirrors where the files should live in your home directory.
 
@@ -335,16 +349,16 @@ The directory structure inside each package mirrors where the files should live 
 For configs that only apply to a specific machine type:
 
 ```bash
-# For Linux/Omarchy-specific configs
-mkdir -p linux-omarchy/.config/your-linux-app
-mv ~/.config/your-linux-app/* linux-omarchy/.config/your-linux-app/
-stow linux-omarchy
-
-# For macOS-specific configs (create the directory first if needed)
+# For macOS-specific configs
 mkdir -p macos/.config/your-mac-app
 mv ~/.config/your-mac-app/* macos/.config/your-mac-app/
 stow macos
 ```
+
+For **Linux-specific shell behavior**, add it to `common/.config/zsh/linux.zsh`
+(sourced only on Linux) rather than a separate package. If you ever accumulate
+Linux-only *config files* (e.g. a window-manager config), create a `linux/`
+stow package parallel to `macos/` and stow it on Linux machines.
 
 ### Adding shell configs
 
@@ -392,7 +406,7 @@ stow common
 ```bash
 # Create symlinks for a package
 stow common
-stow linux-omarchy
+stow macos         # macOS only
 
 # Remove symlinks (dry run first!)
 stow -n -D common  # dry run
@@ -404,8 +418,8 @@ stow -R common
 # Stow with verbose output
 stow -v common
 
-# Stow all packages at once (on Linux/Omarchy)
-stow common linux-omarchy
+# Stow all packages at once (on macOS)
+stow common macos
 ```
 
 ## Detailed Directory Structure
@@ -430,18 +444,12 @@ stow common linux-omarchy
 │   │       ├── private.zsh     # Sensitive/work aliases, DB connections (gitignored)
 │   │       └── machine.zsh.example  # Template for machine-specific config
 │   ├── .tmux.conf
-│   └── zshrc                   # Bootstrap loader (sources modular files)
-├── linux-omarchy/               # Omarchy-specific configs
-│   └── .config/
-│       ├── hypr/               # Hyprland window manager
-│       │   ├── hyprland.conf
-│       │   ├── bindings.conf
-│       │   ├── monitors.conf
-│       │   └── ...
-│       ├── waybar/             # Status bar
-│       │   ├── config.jsonc
-│       │   └── style.css
-│       └── walker/             # Application launcher
+│   ├── .zprofile
+│   └── .zshrc                  # Bootstrap loader (sources modular files)
+├── bootstrap/                   # New-machine setup (not stowed)
+│   └── bootstrap.sh
+├── macos/                       # macOS-only configs
+│   └── Library/Application Support/Sublime Text/  # Sublime user settings + keymap
 ├── CLAUDE.md
 └── README.md
 ```
