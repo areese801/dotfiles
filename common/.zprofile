@@ -6,11 +6,16 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Added by Toolbox App
-export PATH="$PATH:/Users/areese/Library/Application Support/JetBrains/Toolbox/scripts"
+# macOS-only app paths (JetBrains Toolbox, Obsidian) — these directories only
+# exist under /Users and /Applications, so skip them entirely on Linux.
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Added by Toolbox App
+  export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
-# Created by `pipx` on 2026-04-09 20:46:41
-export PATH="$PATH:/Users/areese/.local/bin"
+  # Added by Obsidian
+  export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
+fi
 
-# Added by Obsidian
-export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
+# User-local binaries (pipx, claude, etc.) — $HOME, not a hardcoded /Users path,
+# so this resolves correctly on both macOS and Linux.
+export PATH="$PATH:$HOME/.local/bin"
