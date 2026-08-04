@@ -44,5 +44,8 @@ fi
 [[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
 [[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
-# Created by `pipx` on 2026-04-09 20:46:41
-export PATH="$PATH:/Users/areese/.local/bin"
+# User-local binaries (pipx, claude, etc.). Also set in .zprofile, but repeated
+# here because .zprofile only runs for login shells. `typeset -U` dedupes the
+# resulting PATH so the double-add is harmless.
+export PATH="$PATH:$HOME/.local/bin"
+typeset -U path PATH
