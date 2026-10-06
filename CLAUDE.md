@@ -23,6 +23,7 @@ The repository uses GNU Stow for symlink management with a package-per-context p
 │   └── scripts/      # Custom scripts (symlinked to ~/scripts)
 │
 └── macos/            # macOS-specific configs
+    ├── .config/karabiner/                                   # Karabiner-Elements (macOS-only app)
     └── Library/Application Support/Sublime Text/Packages/User/
 ```
 
@@ -34,7 +35,7 @@ separate stow package. Only add a `linux/` package if a Linux-only *config file*
 | Config Type | Location | Examples |
 |-------------|----------|----------|
 | Cross-platform tools | `common/` | nvim, tmux, zsh, ghostty, yazi |
-| macOS-only paths (`~/Library/...`) | `macos/` | Sublime Text |
+| macOS-only apps (`~/Library/...`, or XDG paths for Mac-only apps) | `macos/` | Sublime Text, Karabiner (`~/.config/karabiner`) |
 | Window managers | `macos/` | yabai, sway (if needed) |
 | DE-specific | `macos/` | sketchybar (if needed) |
 | Package manager configs | `macos/` | brew (if customized) |
@@ -43,7 +44,7 @@ separate stow package. Only add a `linux/` package if a Linux-only *config file*
 ### Current Packages
 
 - `common/` - Shared configs for all machines (nvim, ghostty, yazi, tmux, zsh, scripts, Claude Code)
-- `macos/` - macOS-only configs (Sublime Text user settings + keymap)
+- `macos/` - macOS-only configs (Sublime Text user settings + keymap, Karabiner-Elements config)
 - `agent_skills/` - Git submodule containing SKILL.md-based agent skills (forked from castlenthesky/agent_skills)
 
 ## Architecture
