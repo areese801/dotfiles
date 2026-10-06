@@ -67,6 +67,7 @@
       "Bash(tc patch *)"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [
       {
@@ -119,7 +120,8 @@
     "feature-dev@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "trusty-cage@trusty-cage-plugin": true
+    "trusty-cage@trusty-cage-plugin": true,
+    "kanbaroo@kanbaroo-plugin": true
   },
   "extraKnownMarketplaces": {
     "trusty-cage-plugin": {
@@ -127,6 +129,14 @@
         "source": "github",
         "repo": "areese801/trusty-cage-plugin"
       }
+    },
+    "kanbaroo-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "areese801/kanbaroo-plugin"
+      }
     }
-  }
+  },
+  "tui": "fullscreen",
+  "editorMode": "vim"
 }

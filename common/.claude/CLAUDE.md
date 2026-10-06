@@ -1,7 +1,7 @@
 # Global Claude Code Configuration
 
-**Last Updated**: 2026-04-16
-**Next Review**: 2026-05-16 (30 days)
+**Last Updated**: 2026-05-26
+**Next Review**: 2026-06-25 (30 days)
 
 This file provides universal guidance to Claude Code across all projects.
 
@@ -143,9 +143,6 @@ Fixed stale snippets path, settings file references, and git workflow guidance.
 - The user has many custom aliases and commands
 - If instructed to run an unfamiliar command, use `which` or `alias` to understand it
 
-### Remote Servers
-- **ETL Server**: Access via `ssh etl` (requires VPN, SSH config already in place)
-
 ---
 
 ## Command Permissions
@@ -183,7 +180,7 @@ If changes are being made on main, create a feature branch immediately before mo
 > "Are you working on a specific Jira card?"
 
 **Branch naming:**
-- Jira card: `DATA-1234_fix_specific_issue`
+- Jira card: `PROJ-1234_fix_specific_issue`
 - Otherwise: `feature/<description>`, `fix/<description>`, `chore/<description>`
 
 ### Post-Merge Branch Cleanup
